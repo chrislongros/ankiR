@@ -1,6 +1,6 @@
 Package: ankiR
 Title: Read Anki Flashcard Databases
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: person("Christos", "Longros", email = "chris.longros@gmail.com",
     role = c("aut", "cre"))
 Author: Christos Longros [aut, cre]

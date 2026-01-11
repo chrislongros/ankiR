@@ -93,3 +93,61 @@ anki_cards <- function(path = NULL, profile = NULL) {
 anki_revlog <- function(path = NULL, profile = NULL) {
   col <- anki_collection(path, profile); on.exit(col$close()); col$revlog()
 }
+
+#' Read cards with FSRS parameters
+#'
+#' @param path Path to collection.anki2 (auto-detected if NULL)
+#' @param profile Profile name (first profile if NULL)
+#' @return A tibble of cards with FSRS parameters (stability, difficulty, retention)
+#' @export
+#' @examples
+#' \dontrun{
+#' anki_cards_fsrs()
+#' }
+anki_cards_fsrs <- function(path = NULL, profile = NULL) {
+  col <- anki_collection(path, profile)
+  on.exit(col$close())
+  
+  c <- DBI::dbReadTable(col$con, "cards")
+  
+  # Parse FSRS JSON data
+  fsrs <- lapply(c$data, function(x) {
+    if (is.na(x) || x == "" || x == "{}") {
+      return(list(s = NA_real_, d = NA_real_, dr = NA_real_, decay = NA_real_))
+    }
+    j <- tryCatch(jsonlite::fromJSON(x), error = function(e) list())
+    list(
+      s = j$s %||% NA_real_,
+      d = j$d %||% NA_real_,
+      dr = j$dr %||% NA_real_,
+      decay = j$decay %||% NA_real_
+    )
+  })
+  
+  tibble::tibble(
+    cid = c$id,
+    nid = c$nid,
+    did = c$did,
+    type = c$type,
+    queue = c$queue,
+    due = c$due,
+    ivl = c$ivl,
+    reps = c$reps,
+    lapses = c$lapses,
+    stability = sapply(fsrs, `[[`, "s"),
+    difficulty = sapply(fsrs, `[[`, "d"),
+    retention = sapply(fsrs, `[[`, "dr"),
+    decay = sapply(fsrs, `[[`, "decay")
+  )
+}
+
+#' Calculate current retrievability for FSRS cards
+#'
+#' @param stability Stability in days
+#' @param days_since_review Days since last review
+#' @param decay Decay parameter (default 0.256)
+#' @return Retrievability (0-1)
+#' @export
+fsrs_retrievability <- function(stability, days_since_review, decay = 0.256) {
+  (1 + days_since_review / (9 * stability))^(-1 / decay)
+}
