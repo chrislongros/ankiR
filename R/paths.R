@@ -1,16 +1,32 @@
+#' Get Anki base path
+#'
+#' Returns the default Anki2 directory for the current platform.
+#'
+#' @return Character string path to Anki2 directory
+#' @export
+#' @examples
+#' \dontrun{
+#' anki_base_path()
+#' }
 anki_base_path <- function() {
-  os <- Sys.info()["sysname"]
-  path <- if (os == "Linux") {
-    file.path(Sys.getenv("HOME"), ".local", "share", "Anki2")
-  } else if (os == "Darwin") {
-    file.path(Sys.getenv("HOME"), "Library", "Application Support", "Anki2")
-  } else {
+  if (.Platform$OS.type == "windows") {
     file.path(Sys.getenv("APPDATA"), "Anki2")
+  } else if (Sys.info()["sysname"] == "Darwin") {
+    path.expand("~/Library/Application Support/Anki2")
+  } else {
+    path.expand("~/.local/share/Anki2")
   }
-  if (!dir.exists(path)) stop("Anki base path not found: ", path)
-  path
 }
 
+#' List Anki profiles
+#'
+#' @param base_path Path to Anki2 directory (auto-detected if NULL)
+#' @return Character vector of profile names
+#' @export
+#' @examples
+#' \dontrun{
+#' anki_profiles()
+#' }
 anki_profiles <- function(base_path = NULL) {
   if (is.null(base_path)) base_path <- anki_base_path()
   dirs <- list.dirs(base_path, full.names = FALSE, recursive = FALSE)
@@ -21,6 +37,16 @@ anki_profiles <- function(base_path = NULL) {
   profiles[!profiles %in% c("addons", "addons21")]
 }
 
+#' Get path to Anki database
+#'
+#' @param profile Profile name (first profile if NULL)
+#' @param base_path Path to Anki2 directory (auto-detected if NULL)
+#' @return Character string path to collection.anki2
+#' @export
+#' @examples
+#' \dontrun{
+#' anki_db_path()
+#' }
 anki_db_path <- function(profile = NULL, base_path = NULL) {
   if (is.null(base_path)) base_path <- anki_base_path()
   if (is.null(profile)) {

@@ -1,9 +1,20 @@
 Package: ankiR
-Title: Load and Analyze Anki Flashcard Collections in R
+Title: Read Anki Flashcard Databases
 Version: 0.1.0
-Authors@R: person("Christos", "Longros", , "chris.longros@gmail.com", role = c("aut", "cre"))
-Description: Read Anki flashcard databases directly into R data frames.
+Authors@R: person("Christos", "Longros", email = "chris.longros@gmail.com",
+    role = c("aut", "cre"))
+Author: Christos Longros [aut, cre]
+Maintainer: Christos Longros <chris.longros@gmail.com>
+Description: Read and analyze Anki flashcard collection databases. Provides 
+    functions to access notes, cards, and review logs from Anki's SQLite 
+    database with a tidy interface.
 License: MIT + file LICENSE
 Encoding: UTF-8
-Imports: DBI, RSQLite, jsonlite, tibble, dplyr
-Suggests: testthat, ggplot2
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Imports:
+    DBI,
+    RSQLite,
+    tibble
+URL: https://github.com/chrislongros/ankiR
+BugReports: https://github.com/chrislongros/ankiR/issues
