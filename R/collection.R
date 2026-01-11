@@ -99,6 +99,7 @@ anki_revlog <- function(path = NULL, profile = NULL) {
 #' @param path Path to collection.anki2 (auto-detected if NULL)
 #' @param profile Profile name (first profile if NULL)
 #' @return A tibble of cards with FSRS parameters (stability, difficulty, retention)
+#' @importFrom jsonlite fromJSON
 #' @export
 #' @examples
 #' \dontrun{
@@ -151,3 +152,4 @@ anki_cards_fsrs <- function(path = NULL, profile = NULL) {
 fsrs_retrievability <- function(stability, days_since_review, decay = 0.256) {
   (1 + days_since_review / (9 * stability))^(-1 / decay)
 }
+
