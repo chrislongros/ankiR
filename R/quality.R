@@ -412,31 +412,31 @@ generate_quality_recommendations <- function(notes, cards) {
   }, FUN.VALUE = logical(1)))
  
   if (empty_pct > 0.1) {
-    recs <- c(recs, paste0("⚠ ", round(empty_pct * 100, 1), "% of notes have empty fields"))
+    recs <- c(recs, paste0("! ", round(empty_pct * 100, 1), "% of notes have empty fields"))
   }
  
   leech_pct <- sum(cards$lapses >= 8) / nrow(cards)
   if (leech_pct > 0.05) {
-    recs <- c(recs, paste0("⚠ ", round(leech_pct * 100, 1), "% of cards are leeches (8+ lapses)"))
+    recs <- c(recs, paste0("! ", round(leech_pct * 100, 1), "% of cards are leeches (8+ lapses)"))
   }
  
   suspended_pct <- sum(cards$queue == -1) / nrow(cards)
   if (suspended_pct > 0.1) {
-    recs <- c(recs, paste0("ℹ ", round(suspended_pct * 100, 1), "% of cards are suspended"))
+    recs <- c(recs, paste0("INFO: ", round(suspended_pct * 100, 1), "% of cards are suspended"))
   }
  
   very_long <- sum(nchar(notes$flds) > 2000) / nrow(notes)
   if (very_long > 0.05) {
-    recs <- c(recs, paste0("⚠ ", round(very_long * 100, 1), "% of notes are very long (>2000 chars)"))
+    recs <- c(recs, paste0("! ", round(very_long * 100, 1), "% of notes are very long (>2000 chars)"))
   }
  
   media_pct <- mean(grepl("<img|\\[sound:", notes$flds))
   if (media_pct < 0.1) {
-    recs <- c(recs, "💡 Consider adding more images/audio for better retention")
+    recs <- c(recs, "TIP: Consider adding more images/audio for better retention")
   }
  
   if (length(recs) == 0) {
-    recs <- "✓ No major quality issues detected"
+    recs <- "OK No major quality issues detected"
   }
  
   recs

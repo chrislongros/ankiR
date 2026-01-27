@@ -53,7 +53,7 @@ date_to_anki_timestamp <- function(x) {
 
 # Declare global variables to avoid R CMD check notes
 # These are column names used in ggplot2 aes() and data.frame operations
-utils::globalVariables(c(
+utils::globalVariables(c(".data", 
   "difficulty", "hour", "ivl", "name", "new_due", "quantile",
   "reorder", "retention", "reviews", "rolling_retention", "sd",
   "stability", "total", "week", "weekday", "date", "value",
@@ -61,3 +61,7 @@ utils::globalVariables(c(
   "mid", "sfld", "flds", "tags", "lapses", "type", "queue",
   "retrievability", "decay", "last_review", "period", "age_group"
 ))
+
+# Import .data from rlang for ggplot2 tidy evaluation
+#' @importFrom rlang .data
+NULL

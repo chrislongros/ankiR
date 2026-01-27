@@ -191,12 +191,12 @@ anki_benchmark <- function(path = NULL, profile = NULL) {
   benchmarks$difference <- round(benchmarks$your_value - benchmarks$benchmark, 2)
   benchmarks$status <- ifelse(
     abs(benchmarks$difference) < benchmarks$benchmark * 0.1,
-    "✓ Good",
+    "OK Good",
     ifelse(
       (benchmarks$metric %in% c("Lapse Rate", "Avg Difficulty") & benchmarks$difference > 0) |
       (benchmarks$metric %in% c("Retention Rate", "Avg Stability") & benchmarks$difference < 0),
-      "⚠ Below",
-      "✓ Above"
+      "! Below",
+      "OK Above"
     )
   )
  
