@@ -50,3 +50,14 @@ date_to_anki_timestamp <- function(x) {
 `%||%` <- function(a, b) {
   if (is.null(a)) b else a
 }
+
+# Declare global variables to avoid R CMD check notes
+# These are column names used in ggplot2 aes() and data.frame operations
+utils::globalVariables(c(
+  "difficulty", "hour", "ivl", "name", "new_due", "quantile",
+  "reorder", "retention", "reviews", "rolling_retention", "sd",
+  "stability", "total", "week", "weekday", "date", "value",
+  "component", "cid", "did", "nid", "ease", "time", "review_date",
+  "mid", "sfld", "flds", "tags", "lapses", "type", "queue",
+  "retrievability", "decay", "last_review", "period", "age_group"
+))
