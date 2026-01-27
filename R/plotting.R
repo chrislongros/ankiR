@@ -47,7 +47,7 @@ anki_plot_heatmap <- function(path = NULL, profile = NULL, year = NULL,
  
   # Plot
   ggplot2::ggplot(full_grid, ggplot2::aes(x = week, y = weekday, fill = reviews)) +
-    ggplot2::geom_tile(color = "white", size = 0.4) +
+    ggplot2::geom_tile(color = "white", linewidth = 0.4) +
     ggplot2::scale_fill_gradientn(colors = colors, name = "Reviews") +
     ggplot2::scale_y_discrete(limits = rev(c("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))) +
     ggplot2::labs(title = paste("Review Activity", year), x = "Week", y = NULL) +
@@ -91,7 +91,7 @@ anki_plot_retention <- function(path = NULL, profile = NULL, days = 90, window =
  
   ggplot2::ggplot(daily, ggplot2::aes(x = date)) +
     ggplot2::geom_line(ggplot2::aes(y = retention), alpha = 0.3, color = "blue") +
-    ggplot2::geom_line(ggplot2::aes(y = rolling_retention), color = "blue", size = 1) +
+    ggplot2::geom_line(ggplot2::aes(y = rolling_retention), color = "blue", linewidth = 1) +
     ggplot2::geom_hline(yintercept = 0.9, linetype = "dashed", color = "green", alpha = 0.7) +
     ggplot2::scale_y_continuous(labels = scales_percent, limits = c(0.5, 1)) +
     ggplot2::labs(
