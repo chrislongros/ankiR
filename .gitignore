@@ -1,2 +1,26 @@
-..Rcheck
-.Rcheck
+# R files
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+*.Rproj.user/
+
+# Package build
+*.tar.gz
+*.Rcheck/
+*.dll
+*.so
+*.o
+
+# IDE
+.idea/
+*.swp
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+docs/
+inst/doc

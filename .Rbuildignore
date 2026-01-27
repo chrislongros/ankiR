@@ -1,1 +1,13 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^LICENSE\.md$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
 ^\.github$
+^ankiR\.Rcheck$
+^ankiR_.*\.tar\.gz$
+^\.lintr$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
