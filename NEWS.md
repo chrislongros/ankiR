@@ -99,3 +99,16 @@
 # ankiR 0.1.0
 
 * Initial release with core functions
+
+### Time Series Analysis (11 functions) - timeseries.R
+* `anki_ts_intervals()` - Track interval progression over time
+* `anki_ts_retention()` - Track retention rate changes
+* `anki_ts_stability()` - FSRS stability trends
+* `anki_ts_workload()` - Workload trends over time
+* `anki_ts_learning()` - New cards learned per period
+* `anki_ts_maturation()` - Card maturation tracking
+* `anki_ts_decompose()` - Decompose into trend/seasonal/residual
+* `anki_ts_anomalies()` - Detect unusual study days
+* `anki_ts_forecast()` - Forecast future reviews
+* `anki_ts_autocorrelation()` - Find cyclical patterns
+* `anki_ts_plot()` - Plot any time series with trend

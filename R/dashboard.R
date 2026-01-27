@@ -69,8 +69,8 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
             shiny::h4("Forgetting Index"),
             shiny::verbatimTextOutput("forgetting_index"),
             shiny::hr(),
-            shiny::h4("Workload Estimate"),
-            shiny::tableOutput("workload_estimate")
+            shiny::h4("Review Burden"),
+            shiny::verbatimTextOutput("review_burden")
           ),
          
           shiny::tabPanel("Time Analysis",
@@ -108,44 +108,38 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
   )
  
   server <- function(input, output, session) {
-    # Reactive data
     data <- shiny::reactiveValues(loaded = FALSE)
    
     load_data <- function() {
       shiny::withProgress(message = "Loading data...", {
         data$report <- anki_report(path)
-        shiny::incProgress(0.2)
+        shiny::incProgress(0.25)
         data$deck_stats <- anki_stats_deck(path)
-        shiny::incProgress(0.2)
+        shiny::incProgress(0.25)
         data$daily <- anki_stats_daily(path, from = Sys.Date() - 90)
-        shiny::incProgress(0.2)
-        data$cards_fsrs <- tryCatch(anki_cards_fsrs(path), error = function(e) NULL)
-        shiny::incProgress(0.2)
+        shiny::incProgress(0.25)
         data$cards <- anki_cards(path)
         data$loaded <- TRUE
       })
     }
    
-    shiny::observe({
-      load_data()
-    })
+    load_data()
    
-    shiny::observeEvent(input$refresh, {
-      load_data()
-    })
+    shiny::observeEvent(input$refresh, { load_data() })
    
-    output$collection_path <- shiny::renderText({
-      basename(dirname(path))
-    })
+    output$collection_path <- shiny::renderText({ basename(dirname(path)) })
    
     output$quick_stats <- shiny::renderTable({
       shiny::req(data$loaded)
       r <- data$report
       data.frame(
         Metric = c("Cards", "Notes", "Reviews", "Streak"),
-        Value = c(r$total_cards, r$total_notes, r$total_reviews, r$current_streak)
+        Value = c(format(r$total_cards, big.mark = ","),
+                  format(r$total_notes, big.mark = ","),
+                  format(r$total_reviews, big.mark = ","),
+                  paste(r$current_streak, "days"))
       )
-    }, striped = TRUE)
+    }, colnames = FALSE)
    
     output$heatmap <- shiny::renderPlot({
       shiny::req(data$loaded)
@@ -154,7 +148,7 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
    
     output$retention_plot <- shiny::renderPlot({
       shiny::req(data$loaded)
-      tryCatch(anki_plot_retention(path, days = 90), error = function(e) NULL)
+      tryCatch(anki_plot_retention(path), error = function(e) NULL)
     })
    
     output$intervals_plot <- shiny::renderPlot({
@@ -169,20 +163,18 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
    
     output$deck_stats <- shiny::renderTable({
       shiny::req(data$loaded)
-      df <- data$deck_stats
-      if (nrow(df) > 0) {
-        df[, c("name", "total", "new", "review", "mature", "avg_interval")]
-      }
-    }, striped = TRUE)
+      ds <- data$deck_stats
+      if (nrow(ds) > 0) ds[, c("name", "total", "new", "learning", "review", "mature")]
+    })
    
     output$deck_comparison <- shiny::renderPlot({
       shiny::req(data$loaded)
-      df <- data$deck_stats
-      if (nrow(df) > 0) {
-        ggplot2::ggplot(df, ggplot2::aes(x = reorder(name, total), y = total)) +
+      ds <- data$deck_stats
+      if (nrow(ds) > 0 && nrow(ds) <= 20) {
+        ggplot2::ggplot(ds, ggplot2::aes(x = reorder(name, total), y = total)) +
           ggplot2::geom_col(fill = "#3498db", alpha = 0.8) +
           ggplot2::coord_flip() +
-          ggplot2::labs(title = "Cards by Deck", x = NULL, y = "Cards") +
+          ggplot2::labs(title = "Cards per Deck", x = NULL, y = "Cards") +
           ggplot2::theme_minimal()
       }
     })
@@ -207,44 +199,50 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
       }, error = function(e) cat("FSRS data not available"))
     })
    
-    output$workload_estimate <- shiny::renderTable({
+    output$review_burden <- shiny::renderPrint({
       shiny::req(data$loaded)
-      tryCatch(fsrs_workload_estimate(path), error = function(e) data.frame())
-    }, striped = TRUE)
+      tryCatch({
+        rb <- fsrs_review_burden(path)
+        cat("Predicted daily reviews:", rb$predictions$daily_reviews[1], "\n")
+        cat("Avg stability:", rb$parameters$avg_stability, "days\n")
+      }, error = function(e) cat("FSRS data not available"))
+    })
    
     output$hourly_stats <- shiny::renderTable({
       shiny::req(data$loaded)
       tryCatch({
-        df <- anki_time_by_hour(path)
-        df[df$reviews > 0, c("hour", "reviews", "retention", "total_time_min")]
-      }, error = function(e) data.frame())
-    }, striped = TRUE)
+        h <- anki_time_by_hour(path)
+        h[h$reviews > 0, c("hour", "reviews", "retention", "total_time_min")]
+      }, error = function(e) NULL)
+    })
    
     output$weekday_stats <- shiny::renderTable({
       shiny::req(data$loaded)
-      tryCatch(anki_time_by_weekday(path), error = function(e) data.frame())
-    }, striped = TRUE)
+      tryCatch(anki_time_by_weekday(path), error = function(e) NULL)
+    })
    
     output$consistency <- shiny::renderPrint({
       shiny::req(data$loaded)
       tryCatch({
         c <- anki_consistency(path)
+        cat("Consistency Score:", c$consistency_score, "/ 100\n")
         cat("Study Rate:", c$study_rate, "%\n")
-        cat("Consistency Score:", c$consistency_score, "\n")
-        cat("Avg Reviews/Day:", c$avg_reviews_per_day, "\n")
         cat("Current Streak:", c$current_streak, "days\n")
-      }, error = function(e) cat("Error calculating consistency"))
+        cat("Longest Streak:", c$longest_streak, "days\n")
+      }, error = function(e) cat("Error loading data"))
     })
    
     output$quality_report <- shiny::renderPrint({
       shiny::req(data$loaded)
       tryCatch({
         q <- anki_quality_report(path)
-        cat("=== Overview ===\n")
-        print(q$overview, row.names = FALSE)
+        cat("=== Quality Overview ===\n")
+        for (i in seq_len(nrow(q$overview))) {
+          cat(q$overview$metric[i], ":", q$overview$value[i], "\n")
+        }
         cat("\n=== Recommendations ===\n")
-        cat(paste(q$recommendations, collapse = "\n"))
-      }, error = function(e) cat("Error generating quality report"))
+        for (rec in q$recommendations) cat(rec, "\n")
+      }, error = function(e) cat("Error loading report"))
     })
    
     output$tag_analysis <- shiny::renderPrint({
@@ -253,39 +251,31 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
         t <- anki_tag_analysis(path)
         cat("Total Tags:", t$total_tags, "\n")
         cat("Notes with Tags:", t$notes_with_tags, "\n")
-        cat("Notes without Tags:", t$notes_without_tags, "\n")
-        cat("Avg Tags/Note:", t$avg_tags_per_note, "\n")
-        if (length(t$orphan_tags) > 0) {
-          cat("\nOrphan Tags:", paste(head(t$orphan_tags, 5), collapse = ", "), "\n")
-        }
-      }, error = function(e) cat("Error analyzing tags"))
+        cat("Avg Tags per Note:", t$avg_tags_per_note, "\n")
+      }, error = function(e) cat("Error loading tags"))
     })
    
     output$leeches <- shiny::renderTable({
       shiny::req(data$loaded)
       tryCatch({
-        l <- anki_leeches(path, include_notes = TRUE)
-        if (nrow(l) > 0) {
-          head(l[, c("cid", "lapses", "ivl", "sfld")], 20)
-        } else {
-          data.frame(Message = "No leeches found")
-        }
-      }, error = function(e) data.frame())
-    }, striped = TRUE)
+        l <- anki_leeches(path, threshold = 8, include_notes = TRUE)
+        if (nrow(l) > 0) head(l[, c("cid", "lapses", "ivl", "sfld")], 20)
+      }, error = function(e) NULL)
+    })
    
     output$streak_info <- shiny::renderPrint({
       shiny::req(data$loaded)
-      s <- anki_streak(path)
-      cat("Current Streak:", s$current_streak, "days\n")
-      cat("Longest Streak:", s$longest_streak, "days\n")
-      cat("Total Days Studied:", s$total_days_studied, "\n")
-      cat("Last Review:", as.character(s$last_review), "\n")
+      r <- data$report
+      cat("Current Streak:", r$current_streak, "days\n")
+      cat("Longest Streak:", r$longest_streak, "days\n")
+      cat("Days Studied:", r$days_studied, "\n")
+      cat("Total Time:", r$total_time_hours, "hours\n")
     })
    
     output$monthly_summary <- shiny::renderTable({
       shiny::req(data$loaded)
-      tryCatch(anki_monthly_summary(path), error = function(e) data.frame())
-    }, striped = TRUE)
+      tryCatch(anki_monthly_summary(path, months = 6), error = function(e) NULL)
+    })
   }
  
   shiny::shinyApp(ui, server)
