@@ -1,13 +1,13 @@
 Package: ankiR
 Title: Read 'Anki' Flashcard Databases
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: person("Christos", "Longros", email = "chris.longros@gmail.com",
     role = c("aut", "cre"))
-Author: Christos Longros [aut, cre]
-Maintainer: Christos Longros <chris.longros@gmail.com>
-Description: Read and analyze Anki flashcard collection databases. Provides 
-    functions to access notes, cards, and review logs from 'Anki' 'SQLite' 
-    database with a tidy interface.
+Description: Read and analyze 'Anki' flashcard collection databases. Provides 
+    functions to access notes, cards, decks, note types, and review logs from 
+    'Anki' 'SQLite' databases with a tidy interface. Supports extraction of 
+    'FSRS' (Free Spaced Repetition Scheduler) parameters including stability, 
+    difficulty, and retrievability for advanced spaced repetition analysis.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -17,5 +17,13 @@ Imports:
     DBI,
     RSQLite,
     tibble
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown,
+    ggplot2,
+    withr
+Config/testthat/edition: 3
 URL: https://github.com/chrislongros/ankiR
 BugReports: https://github.com/chrislongros/ankiR/issues
+VignetteBuilder: knitr

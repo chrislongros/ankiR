@@ -12,7 +12,8 @@ anki_revlog(path = NULL, profile = NULL)
 \item{profile}{Profile name (first profile if NULL)}
 }
 \value{
-A tibble of review log entries
+A tibble of review log entries with columns: rid, cid, ease, ivl,
+time, review_date
 }
 \description{
 Read review log from Anki collection

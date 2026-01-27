@@ -7,20 +7,32 @@
 anki_collection(path = NULL, profile = NULL)
 }
 \arguments{
-\item{path}{Path to collection.anki2 (auto-detected if NULL)}
+\item{path}{Path to collection.anki2 file. If NULL, auto-detected from
+default Anki location.}
 
-\item{profile}{Profile name (first profile if NULL)}
+\item{profile}{Profile name. If NULL, uses first available profile.}
 }
 \value{
-An anki_collection object with methods: notes(), cards(), revlog(), tables(), close()
+An anki_collection object with methods:
+\itemize{
+\item \code{notes()} - Get all notes
+\item \code{cards()} - Get all cards
+\item \code{revlog()} - Get review log
+\item \code{decks()} - Get deck information
+\item \code{models()} - Get note types (models)
+\item \code{tables()} - List all tables
+\item \code{close()} - Close database connection
+}
 }
 \description{
-Open an Anki collection
+Opens an Anki collection database and returns an object with methods to
+access notes, cards, decks, note types, and review logs.
 }
 \examples{
 \dontrun{
 col <- anki_collection()
 col$notes()
+col$decks()
 col$close()
 }
 }

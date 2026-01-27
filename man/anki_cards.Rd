@@ -12,7 +12,8 @@ anki_cards(path = NULL, profile = NULL)
 \item{profile}{Profile name (first profile if NULL)}
 }
 \value{
-A tibble of cards
+A tibble of cards with columns: cid, nid, did, type, queue, due,
+ivl, reps, lapses
 }
 \description{
 Read cards from Anki collection

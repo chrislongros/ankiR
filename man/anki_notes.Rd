@@ -12,7 +12,7 @@ anki_notes(path = NULL, profile = NULL)
 \item{profile}{Profile name (first profile if NULL)}
 }
 \value{
-A tibble of notes
+A tibble of notes with columns: nid, mid, tags, flds, sfld
 }
 \description{
 Read notes from Anki collection

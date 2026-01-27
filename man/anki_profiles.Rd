@@ -13,7 +13,7 @@ anki_profiles(base_path = NULL)
 Character vector of profile names
 }
 \description{
-List Anki profiles
+Returns the names of all Anki profiles found in the Anki2 directory.
 }
 \examples{
 \dontrun{

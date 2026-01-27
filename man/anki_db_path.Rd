@@ -7,18 +7,19 @@
 anki_db_path(profile = NULL, base_path = NULL)
 }
 \arguments{
-\item{profile}{Profile name (first profile if NULL)}
+\item{profile}{Profile name. If NULL, uses the first available profile.}
 
 \item{base_path}{Path to Anki2 directory (auto-detected if NULL)}
 }
 \value{
-Character string path to collection.anki2
+Character string path to collection.anki2 or collection.anki21
 }
 \description{
-Get path to Anki database
+Returns the full path to an Anki collection database file.
 }
 \examples{
 \dontrun{
 anki_db_path()
+anki_db_path("User 1")
 }
 }

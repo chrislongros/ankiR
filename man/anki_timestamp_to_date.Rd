@@ -7,14 +7,15 @@
 anki_timestamp_to_date(x)
 }
 \arguments{
-\item{x}{Numeric timestamp in milliseconds since epoch}
+\item{x}{Numeric timestamp in milliseconds since Unix epoch (1970-01-01)}
 }
 \value{
 Date object
 }
 \description{
-Convert Anki timestamp to date
+Converts Anki's millisecond-epoch timestamps to Date objects.
 }
 \examples{
+# Convert a typical Anki timestamp
 anki_timestamp_to_date(1368291917470)
 }
