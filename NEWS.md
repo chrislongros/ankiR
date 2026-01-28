@@ -1,3 +1,67 @@
+# ankiR 0.6.0
+
+## Major New Features
+
+### Learning Efficiency Analysis
+* `anki_learning_efficiency()` - Calculate learning ROI (successful retention per time, efficiency ratio, learning points per minute)
+* `anki_retention_by_type()` - Break down retention by card characteristics (cloze vs basic, with/without media, by length, by note type)
+* `anki_roi_analysis()` - Calculate knowledge half-life extension per study minute, cumulative retention value
+
+### Forgetting Curve Analysis
+* `anki_fit_forgetting_curve()` - Fit power law forgetting curve to actual review data, compare to FSRS defaults
+* `anki_plot_forgetting_curve()` - Visualization comparing fitted curve to FSRS default with confidence intervals
+
+### Optimal Review Timing
+* `anki_best_review_times()` - Analyze retention/performance by hour and weekday, identify best/worst times
+* `anki_session_analysis()` - Identify discrete study sessions, analyze duration/retention/fatigue patterns
+* `anki_simulate_session()` - Given time budget, predict cards completed and expected retention
+
+### Sibling & Interference Analysis
+* `anki_sibling_analysis()` - Analyze how sibling cards affect each other's retention, statistical testing
+* `anki_interference_analysis()` - Detect cards frequently confused (co-failure patterns, content similarity)
+* `anki_weak_areas()` - Identify tags/decks with lowest retention or highest lapse rates
+
+### Actionable Recommendations
+* `anki_card_recommendations()` - Generate recommendations for leeches, unsuspend candidates, cards to retire
+* `anki_health_check()` - Comprehensive health check with 0-100 score (orphan cards, leech rates, missing FSRS)
+* `anki_summary()` - One-liner overview (total cards, mature cards, due today, streak, retention)
+* `anki_today()` - Today's activity summary with breakdown by ease button
+
+### Extended FSRS Analysis
+* `fsrs_compare_parameters()` - Compare your FSRS parameters against defaults, flag significant differences
+* `fsrs_decay_distribution()` - Analyze FSRS-6 per-card decay parameter distribution (requires Anki 24.11+)
+* `fsrs_memory_states()` - Calculate current FSRS memory state for all cards with future projections
+* `anki_response_time_outliers()` - Find reviews with suspicious times (too fast or too slow)
+
+### Academic/Exam Preparation Tools
+* `anki_exam_readiness()` - Project completion and retention before exam date, assess risk level
+* `anki_coverage_analysis()` - Show percentage complete/mature/retained by topic
+* `anki_study_priorities()` - Identify which topics should be prioritized
+* `anki_study_plan()` - Generate daily study plan based on exam date and available time
+
+### Additional Export Formats
+* `anki_to_obsidian_sr()` - Export to Obsidian Spaced Repetition plugin format
+* `anki_to_mochi()` - Export to Mochi Cards JSON format
+* `anki_to_json()` - Full collection as structured JSON for web dashboards
+* `anki_progress_report()` - Generate shareable HTML or Markdown progress report
+
+### Enhanced Search
+* `anki_search_enhanced()` - Advanced search with `added:`, `rated:`, `note:`, `card:`, `prop:`, `re:` and OR operators
+* `anki_find_similar()` - Find similar cards using TF-IDF, Jaccard, or n-gram similarity
+
+### Enhanced Simulation & Forecasting
+* `fsrs_simulate_enhanced()` - Monte Carlo simulation with confidence intervals, learning steps, new cards
+* `anki_forecast_enhanced()` - ARIMA, seasonal, and Holt-Winters forecasting with workload ceilings
+* `anki_workload_projection()` - Project workload with scenario analysis
+* `anki_retention_stability()` - Analyze how stable your retention is over time
+
+### Utilities
+* `anki_schema_version()` - Detect Anki database schema version for compatibility debugging
+* `anki_quick_summary()` - Get a one-liner overview of your collection
+* `anki_cache_enable()` / `anki_cache_clear()` - Enable caching for faster repeated operations
+
+---
+
 # ankiR 0.5.0
 
 ## New Features
@@ -52,6 +116,21 @@
 * `fsrs_from_csv()` - Import review data from other sources
 * `anki_export_importable()` - Export to Anki-importable format
 
+### Time Series Analysis
+* `anki_ts_intervals()` - Track interval progression over time
+* `anki_ts_retention()` - Track retention rate changes
+* `anki_ts_stability()` - FSRS stability trends
+* `anki_ts_workload()` - Workload trends over time
+* `anki_ts_learning()` - New cards learned per period
+* `anki_ts_maturation()` - Card maturation tracking
+* `anki_ts_decompose()` - Decompose into trend/seasonal/residual
+* `anki_ts_anomalies()` - Detect unusual study days
+* `anki_ts_forecast()` - Forecast future reviews
+* `anki_ts_autocorrelation()` - Find cyclical patterns
+* `anki_ts_plot()` - Plot any time series with trend
+
+---
+
 # ankiR 0.4.0
 
 ## Features
@@ -85,30 +164,23 @@
 ### Export
 * `anki_to_csv()`, `anki_report()`, `anki_export_revlog()`, `anki_forecast()`
 
+---
+
 # ankiR 0.3.0
 
 * `anki_decks()`, `anki_models()`, `fsrs_interval()`, `date_to_anki_timestamp()`
 * FSRS-6 per-card decay parameter support
 * Comprehensive test suite
 
+---
+
 # ankiR 0.2.0
 
 * FSRS parameter support via `anki_cards_fsrs()`
 * `fsrs_retrievability()` function
 
+---
+
 # ankiR 0.1.0
 
 * Initial release with core functions
-
-### Time Series Analysis (11 functions) - timeseries.R
-* `anki_ts_intervals()` - Track interval progression over time
-* `anki_ts_retention()` - Track retention rate changes
-* `anki_ts_stability()` - FSRS stability trends
-* `anki_ts_workload()` - Workload trends over time
-* `anki_ts_learning()` - New cards learned per period
-* `anki_ts_maturation()` - Card maturation tracking
-* `anki_ts_decompose()` - Decompose into trend/seasonal/residual
-* `anki_ts_anomalies()` - Detect unusual study days
-* `anki_ts_forecast()` - Forecast future reviews
-* `anki_ts_autocorrelation()` - Find cyclical patterns
-* `anki_ts_plot()` - Plot any time series with trend
