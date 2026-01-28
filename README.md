@@ -1,182 +1,151 @@
 # ankiR
 
-<!-- badges: start -->
 [![R-CMD-check](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml)
-[![r-universe](https://cran.r-universe.dev/badges/ankiR)](https://cran.r-universe.dev/ankiR)
-<!-- badges: end -->
+[![r-universe](https://chrislongros.r-universe.dev/badges/ankiR)](https://chrislongros.r-universe.dev/ankiR)
+[![CRAN status](https://www.r-pkg.org/badges/version/ankiR)](https://CRAN.R-project.org/package=ankiR)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/ankiR)](https://cran.r-project.org/package=ankiR)
 
 Comprehensive R toolkit for reading, analyzing, and visualizing [Anki](https://apps.ankiweb.net/) flashcard collection databases. **91 functions** with full support for FSRS (Free Spaced Repetition Scheduler).
 
 ## Installation
 
 ```r
-# From r-universe (recommended)
-install.packages("ankiR", repos = "https://cran.r-universe.dev")
+# From r-universe (recommended - latest version 0.5.0)
+install.packages("ankiR", repos = "https://chrislongros.r-universe.dev")
 
-# From GitHub
+# From CRAN
+install.packages("ankiR")
+
+# From GitHub (development)
 remotes::install_github("chrislongros/ankiR")
-
-# Arch Linux (AUR)
-# yay -S r-ankir
 ```
+
+## Anki Addon
+
+An Anki addon version is also available: [ankiR Stats on AnkiWeb](https://ankiweb.net/shared/info/419954163)
+
+Install in Anki with code: `419954163`
 
 ## Quick Start
 
 ```r
 library(ankiR)
 
-anki_report()
-#> $total_cards
-#> [1] 5847
-#> $retention_rate
-#> [1] 91.2
-#> $current_streak
-#> [1] 47
+# Read your collection
+col <- read_anki("~/.local/share/Anki2/User 1/collection.anki2")
+
+# Get review history
+reviews <- get_reviews(col)
+
+# Calculate retention over time
+retention <- ts_retention(reviews, period = "week")
+
+# Plot it
+plot_retention(retention)
 ```
 
-## Visualizations
+## Package Overview
 
-### Time Series Analysis
-
-Track your learning progress over time with built-in time series functions:
-
-```r
-retention <- anki_ts_retention(by = "week")
-anki_ts_plot(retention, "retention", "Weekly Retention %")
+```mermaid
+graph LR
+    A[collection.anki2] --> B[ankiR]
+    B --> C[Data Extraction]
+    B --> D[Time Series Analysis]
+    B --> E[FSRS Analytics]
+    B --> F[Visualization]
+    
+    C --> C1[Cards & Notes]
+    C --> C2[Review History]
+    C --> C3[Deck Structure]
+    
+    D --> D1[Retention Trends]
+    D --> D2[Decomposition]
+    D --> D3[Forecasting]
+    
+    E --> E1[Stability]
+    E --> E2[Difficulty]
+    E --> E3[Retrievability]
+    
+    F --> F1[Plots]
+    F --> F2[Heatmaps]
+    F --> F3[Reports]
 ```
 
-![Weekly Retention](man/figures/retention.png)
+## Sample Visualizations
 
-```r
-intervals <- anki_ts_intervals(by = "week")
-anki_ts_plot(intervals, "median_ivl", "Weekly Median Interval")
-```
+### Weekly Retention with Trend
 
-![Weekly Intervals](man/figures/intervals.png)
+![Retention](man/figures/addon/timeseries.png)
 
-```r
-decomp <- anki_ts_decompose()
-plot(decomp)
-```
+### Review Heatmap
 
-![Time Series Decomposition](man/figures/decomposition.png)
+![Heatmap](man/figures/addon/heatmap.png)
 
-```r
-anki_plot_heatmap()
-```
+### Time Series Decomposition
 
-![Review Heatmap](man/figures/heatmap.png)
+![Decomposition](man/figures/addon/decomposition.png)
 
-### More Visualizations
-
-```r
-anki_plot_retention()     # Retention over time
-anki_plot_forecast()      # Upcoming review workload
-anki_plot_difficulty()    # FSRS difficulty distribution
-anki_plot_intervals()     # Interval distribution histogram
-anki_plot_hours()         # Reviews by hour of day
-anki_plot_weekdays()      # Reviews by day of week
-```
-
-## Features
-
-### Time Series Functions
+## Time Series Functions
 
 | Function | Description |
 |----------|-------------|
-| `anki_ts_intervals()` | Track interval growth over time |
-| `anki_ts_retention()` | Retention rate trends |
-| `anki_ts_stability()` | FSRS stability trends |
-| `anki_ts_workload()` | Review workload over time |
-| `anki_ts_learning()` | New cards learned per period |
-| `anki_ts_maturation()` | Card maturation tracking |
-| `anki_ts_decompose()` | Decompose into trend + seasonal + residual |
-| `anki_ts_anomalies()` | Detect unusual study days |
-| `anki_ts_forecast()` | Forecast future reviews |
-| `anki_ts_autocorrelation()` | Find cyclical patterns |
-| `anki_ts_plot()` | Plot any time series with trend line |
+| `ts_reviews()` | Aggregate reviews by time period |
+| `ts_retention()` | Calculate retention over time |
+| `ts_intervals()` | Track interval changes over time |
+| `ts_workload()` | Measure daily/weekly workload |
+| `ts_decompose()` | Decompose into trend + seasonal + residual |
+| `ts_autocorrelation()` | Find cyclical patterns |
+| `ts_anomalies()` | Detect unusual study days |
+| `ts_forecast()` | Predict future reviews |
+| `ts_streak()` | Calculate study streaks |
+| `ts_moving_average()` | Smooth time series data |
+| `ts_cumulative()` | Cumulative statistics over time |
 
-### Search (Anki-like syntax)
+## Function Categories
 
-```r
-anki_search("deck:Medical tag:cardiology")
-anki_search("is:due -is:suspended prop:ivl>30")
+| Category | Count | Description |
+|----------|-------|-------------|
+| Data Import | 8 | Read collections, extract data |
+| Card Analysis | 12 | Analyze cards, notes, decks |
+| Review Analysis | 15 | Process review history |
+| Time Series | 11 | Temporal analysis and forecasting |
+| FSRS | 10 | FSRS scheduler analytics |
+| Visualization | 14 | Plots and charts |
+| Search | 6 | Search cards and content |
+| Comparison | 5 | Compare decks, time periods |
+| Export | 5 | Export to various formats |
+| Utilities | 5 | Helper functions |
 
-anki_leeches()       # Problem cards
-anki_mature()        # Cards with ivl >= 21
-anki_due()           # Due for review
-```
+## FSRS Support
 
-### FSRS Support
-
-```r
-anki_cards_fsrs()                    # Get FSRS parameters
-fsrs_current_retrievability()        # Current memory state
-fsrs_forgetting_index()              # % below target retention
-fsrs_time_to_mastery(deck = "Med")   # When will deck be learned?
-fsrs_review_burden()                 # Long-term workload estimate
-```
-
-### Comparative Analysis
+Full support for Anki's FSRS scheduler:
 
 ```r
-anki_compare_periods()    # This month vs last month
-anki_compare_decks()      # Side-by-side deck stats
-anki_benchmark()          # Compare to FSRS averages
+# Get FSRS parameters for all cards
+fsrs_data <- get_cards_fsrs(col)
+
+# Calculate current retrievability
+retrievability <- fsrs_retrievability(fsrs_data)
+
+# Find cards below target retention
+at_risk <- fsrs_forgetting_index(fsrs_data, target = 0.9)
+
+# Analyze stability distribution
+stability_stats <- fsrs_stability_distribution(fsrs_data)
 ```
-
-### Card Quality
-
-```r
-anki_quality_report()              # Overall quality assessment
-anki_similar_cards(threshold=0.9)  # Find duplicates
-anki_tag_analysis()                # Tag statistics
-```
-
-### Export
-
-```r
-anki_to_csv("Medical", "medical.csv")
-anki_to_org("Medical", "medical.org")
-anki_to_markdown("Medical", "medical.md", format = "obsidian")
-anki_to_html("report.html")
-fsrs_export_reviews("reviews.csv")
-```
-
-### Interactive Dashboard
-
-```r
-anki_dashboard()  # Launches Shiny app
-```
-
-## Function Reference
-
-| Category | Count | Key Functions |
-|----------|------:|---------------|
-| Core | 8 | `anki_cards`, `anki_notes`, `anki_decks`, `anki_revlog` |
-| Analytics | 12 | `anki_report`, `anki_stats_deck`, `anki_stats_daily` |
-| Plotting | 8 | `anki_plot_heatmap`, `anki_plot_retention`, `anki_plot_forecast` |
-| Time Series | 11 | `anki_ts_intervals`, `anki_ts_decompose`, `anki_ts_anomalies` |
-| Compare | 5 | `anki_compare_decks`, `anki_compare_periods`, `anki_benchmark` |
-| Search | 7 | `anki_search`, `anki_leeches`, `anki_mature`, `anki_due` |
-| Quality | 6 | `anki_quality_report`, `anki_similar_cards`, `anki_tag_analysis` |
-| FSRS | 14 | `fsrs_retrievability`, `fsrs_forgetting_index`, `fsrs_review_burden` |
-| Media | 5 | `anki_media_list`, `anki_media_unused`, `anki_media_missing` |
-| Export | 8 | `anki_to_csv`, `anki_to_org`, `anki_to_markdown`, `anki_to_html` |
-| Dashboard | 1 | `anki_dashboard` |
-| **Total** | **91** | |
 
 ## Requirements
 
-- R >= 4.1
-- Anki 2.1+ (collection.anki2 format)
-- Optional: ggplot2 (plots), shiny (dashboard)
-
-## Related Projects
-
-- [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs) - FSRS optimizer in R
-- [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) - FSRS for Anki
+- R ≥ 4.1.0
+- Anki collection file (collection.anki2)
 
 ## License
 
 MIT
+
+## Links
+
+- [CRAN](https://cran.r-project.org/package=ankiR)
+- [r-universe](https://chrislongros.r-universe.dev/ankiR)
+- [GitHub](https://github.com/chrislongros/ankiR)
+- [Anki Addon](https://ankiweb.net/shared/info/419954163)
