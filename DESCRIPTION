@@ -22,7 +22,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: rlang, jsonlite, DBI, RSQLite, tibble
+Imports: rlang, jsonlite, DBI, RSQLite, tibble, scales
 Suggests: testthat (>= 3.0.0), knitr, rmarkdown, ggplot2, withr, dplyr,
         shiny
 Config/testthat/edition: 3

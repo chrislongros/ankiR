@@ -43,9 +43,9 @@ fsrs_compare_parameters <- function(path = NULL, profile = NULL) {
   param_names <- c(
     "Initial Stability (Again)", "Initial Stability (Hard)",
     "Initial Stability (Good)", "Initial Stability (Easy)",
-    "Difficulty Mean Reversion", "Difficulty Δ (Again)",
-    "Difficulty Δ (Hard)", "Difficulty Δ (Good)",
-    "Difficulty Δ (Easy)", "Stability Fail Factor",
+    "Difficulty Mean Reversion", "Difficulty Change (Again)",
+    "Difficulty Change (Hard)", "Difficulty Change (Good)",
+    "Difficulty Change (Easy)", "Stability Fail Factor",
     "Stability Decay", "Stability Increase Base",
     "Difficulty Impact", "Retrievability Impact",
     "Stability Increase Difficulty Mod", "Stability After Fail",
@@ -220,75 +220,6 @@ fsrs_decay_distribution <- function(path = NULL, profile = NULL, by_deck = FALSE
   result <- result[order(result$mean_decay), ]
 
   tibble::as_tibble(result[, c("name", "mean_decay", "median_decay", "n_cards")])
-}
-
-#' Export reviews for FSRS optimization
-#'
-#' Exports review data in a format suitable for external FSRS optimizers.
-#'
-#' @param path Path to collection.anki2 (auto-detected if NULL)
-#' @param profile Profile name (first profile if NULL)
-#' @param output_path Path for output CSV file
-#' @param format Output format: "fsrs" (for FSRS optimizer) or "raw"
-#' @return Invisibly returns the data frame, also writes to file
-#' @export
-#' @examples
-#' \dontrun{
-#' fsrs_export_reviews(output_path = "reviews.csv")
-#' }
-fsrs_export_reviews <- function(path = NULL, profile = NULL,
-                                output_path = "fsrs_reviews.csv",
-                                format = "fsrs") {
-  col <- anki_collection(path, profile)
-  on.exit(col$close())
-
-  revlog <- col$revlog()
-  cards <- col$cards()
-  decks <- col$decks()
-
-  # Order by card and time
-  revlog <- revlog[order(revlog$cid, revlog$rid), ]
-
-  if (format == "fsrs") {
-    # Format for FSRS optimizer
-    # card_id, review_th, delta_t, rating, state
-
-    revlog_split <- split(revlog, revlog$cid)
-
-    export_data <- lapply(revlog_split, function(card_revs) {
-      card_revs <- card_revs[order(card_revs$rid), ]
-      n <- nrow(card_revs)
-
-      if (n < 2) return(NULL)
-
-      dates <- card_revs$review_date
-      delta_t <- c(0, as.numeric(diff(dates)))
-
-      data.frame(
-        card_id = card_revs$cid,
-        review_th = 1:n,
-        delta_t = delta_t,
-        rating = card_revs$ease,
-        time_ms = card_revs$time
-      )
-    })
-
-    export_df <- do.call(rbind, Filter(Negate(is.null), export_data))
-
-  } else {
-    # Raw format with all data
-    revlog <- merge(revlog, cards[, c("cid", "nid", "did")], by = "cid", all.x = TRUE)
-    revlog <- merge(revlog, decks[, c("did", "name")], by = "did", all.x = TRUE)
-
-    export_df <- revlog[, c("rid", "cid", "nid", "name", "ease", "ivl", "time", "review_date")]
-    names(export_df)[names(export_df) == "name"] <- "deck"
-  }
-
-  # Write to file
-  utils::write.csv(export_df, output_path, row.names = FALSE)
-  message("Exported ", nrow(export_df), " reviews to ", output_path)
-
-  invisible(export_df)
 }
 
 #' Calculate memory state for cards

@@ -2,6 +2,41 @@
 
 ## Major New Features
 
+### Monte Carlo Forecasting (NEW)
+* `anki_forecast_monte_carlo()` - Forecast using bootstrap simulation with 3 methods:
+  - `weekday`: Preserves day-of-week patterns (recommended)
+  - `block`: Preserves temporal sequences
+  - `simple`: Independent sampling
+* `anki_plot_monte_carlo()` - Visualize forecasts with confidence bands and simulation traces
+* `anki_compare_forecasts()` - Compare Monte Carlo vs statistical methods (ARIMA, Holt-Winters)
+* Features: empirical confidence intervals, probability queries (`prob_above()`, `prob_below()`), handles irregular study habits
+
+### Burnout Detection & Review Quality (NEW)
+* `anki_burnout_detection()` - Detect warning signs: declining retention, increasing response time, shorter sessions, more lapses
+* `anki_review_quality()` - Detect pattern clicking, rushed reviews, suspicious timing, review bunching
+
+### Cohort Analysis & Learning Velocity (NEW)
+* `anki_cohort_analysis()` - Compare card performance by when added (vintage analysis)
+* `anki_learning_velocity()` - Track cards/day, acceleration/deceleration, retention trends
+* `anki_backlog_calculator()` - Calculate time to clear backlog, project backlog growth if you stop
+
+### Gamification (NEW)
+* `anki_gamification()` - XP system, levels (Novice to Grandmaster), 22 achievements, weekly goals
+
+### Streak Analytics (NEW)
+* `anki_streak_analytics()` - Best streaks, recovery time after breaks, weekend patterns, survival curves
+
+### Card Content Analysis (NEW)
+* `anki_card_content()` - Word count, cloze density, complexity score, media usage, complexity vs retention
+
+### A/B Comparison (NEW)
+* `anki_ab_comparison()` - Compare retention by note type, deck, tag, or creation period
+* `anki_compare_groups()` - Statistical comparison of two groups with significance testing
+
+### Addon Integration (NEW)
+* `import_addon_export()` - Import JSON exports from ankiR Stats addon
+* `analyze_addon_import()` - Analyze imported addon data
+
 ### Learning Efficiency Analysis
 * `anki_learning_efficiency()` - Calculate learning ROI (successful retention per time, efficiency ratio, learning points per minute)
 * `anki_retention_by_type()` - Break down retention by card characteristics (cloze vs basic, with/without media, by length, by note type)
@@ -49,16 +84,27 @@
 * `anki_search_enhanced()` - Advanced search with `added:`, `rated:`, `note:`, `card:`, `prop:`, `re:` and OR operators
 * `anki_find_similar()` - Find similar cards using TF-IDF, Jaccard, or n-gram similarity
 
-### Enhanced Simulation & Forecasting
-* `fsrs_simulate_enhanced()` - Monte Carlo simulation with confidence intervals, learning steps, new cards
+### Enhanced Forecasting
 * `anki_forecast_enhanced()` - ARIMA, seasonal, and Holt-Winters forecasting with workload ceilings
-* `anki_workload_projection()` - Project workload with scenario analysis
+* `anki_workload_projection()` - Rough workload estimates with scenario comparison (for accurate FSRS simulation, use Anki's built-in simulator or FSRS Helper add-on)
 * `anki_retention_stability()` - Analyze how stable your retention is over time
 
 ### Utilities
 * `anki_schema_version()` - Detect Anki database schema version for compatibility debugging
 * `anki_quick_summary()` - Get a one-liner overview of your collection
-* `anki_cache_enable()` / `anki_cache_clear()` - Enable caching for faster repeated operations
+* `anki_today()` - Detailed breakdown of today's Anki activity
+
+### Removed (use r-fsrs instead)
+The following algorithm functions were removed - ankiR focuses on reading/analyzing data, not implementing FSRS.
+For FSRS algorithm, use [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs):
+* `fsrs_retrievability()` - use `fsrsr::fsrs_retrievability()`
+* `fsrs_interval()` - use `fsrsr::fsrs_next_interval()`
+* `fsrs_simulate()` - use Anki's built-in simulator
+* `fsrs_simulate_new_deck()` - use Anki's built-in simulator
+* `fsrs_time_to_mastery()` - use Anki's built-in simulator
+* `fsrs_review_burden()` - use Anki's built-in simulator
+* `fsrs_workload_estimate()` - use Anki's built-in simulator
+* `fsrs_optimal_new_rate()` - use Anki's built-in simulator
 
 ---
 

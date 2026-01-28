@@ -97,7 +97,7 @@ read_cards <- function(con) {
 #' @keywords internal
 read_revlog <- function(con) {
   r <- DBI::dbReadTable(con, "revlog")
-  tibble::tibble(
+  result <- tibble::tibble(
     rid = r$id,
     cid = r$cid,
     ease = r$ease,
@@ -105,6 +105,11 @@ read_revlog <- function(con) {
     time = r$time,
     review_date = anki_timestamp_to_date(r$id)
   )
+  # Add type column if it exists (0=learning, 1=review, 2=relearning, 3=filtered)
+  if ("type" %in% names(r)) {
+    result$review_type <- r$type
+  }
+  result
 }
 
 #' @keywords internal
@@ -374,16 +379,10 @@ anki_cards_fsrs <- function(path = NULL, profile = NULL) {
 #' where \code{factor = 0.9^(-1/decay) - 1}.
 #'
 #' When \code{t = S}, retrievability equals 90% by definition.
-#' @export
+#' @keywords internal
 #' @examples
 #' # Card with 30-day stability reviewed 15 days ago
 #' fsrs_retrievability(stability = 30, days_elapsed = 15)
-#'
-#' # Using FSRS-4.5 decay (0.5)
-#' fsrs_retrievability(stability = 30, days_elapsed = 15, decay = 0.5)
-#'
-#' # Using custom decay from FSRS-6 optimization
-#' fsrs_retrievability(stability = 30, days_elapsed = 15, decay = 0.2)
 fsrs_retrievability <- function(stability, days_elapsed, decay = 0.5) {
   # FSRS-6 formula: R = (1 + factor * t / S)^(-decay)
 
@@ -405,13 +404,10 @@ fsrs_retrievability <- function(stability, days_elapsed, decay = 0.5) {
 #' @details
 #' Derived from the retrievability formula by solving for t:
 #' \deqn{I(r, S) = S / factor \cdot (r^{-1/decay} - 1)}
-#' @export
+#' @keywords internal
 #' @examples
 #' # When should a card with 30-day stability be reviewed for 90% retention?
 #' fsrs_interval(stability = 30, desired_retention = 0.9)
-#'
-#' # For 85% retention
-#' fsrs_interval(stability = 30, desired_retention = 0.85)
 fsrs_interval <- function(stability, desired_retention = 0.9, decay = 0.5) {
   factor <- 0.9^(-1 / decay) - 1
   stability / factor * (desired_retention^(-1 / decay) - 1)

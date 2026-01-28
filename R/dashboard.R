@@ -202,9 +202,15 @@ anki_dashboard <- function(path = NULL, profile = NULL) {
     output$review_burden <- shiny::renderPrint({
       shiny::req(data$loaded)
       tryCatch({
-        rb <- fsrs_review_burden(path)
-        cat("Predicted daily reviews:", rb$predictions$daily_reviews[1], "\n")
-        cat("Avg stability:", rb$parameters$avg_stability, "days\n")
+        cards_fsrs <- anki_cards_fsrs(path)
+        cards_fsrs <- cards_fsrs[!is.na(cards_fsrs$stability) & cards_fsrs$stability > 0, ]
+        if (nrow(cards_fsrs) > 0) {
+          cat("Cards with FSRS data:", nrow(cards_fsrs), "\n")
+          cat("Avg stability:", round(mean(cards_fsrs$stability), 1), "days\n")
+          cat("Avg difficulty:", round(mean(cards_fsrs$difficulty, na.rm = TRUE), 2), "\n")
+        } else {
+          cat("No FSRS data available\n")
+        }
       }, error = function(e) cat("FSRS data not available"))
     })
    

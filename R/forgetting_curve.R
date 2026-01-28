@@ -256,15 +256,16 @@ anki_plot_forgetting_curve <- function(curve_data) {
 
   d <- curve_data$data
 
-  ggplot2::ggplot(d, ggplot2::aes(x = mid_days)) +
-    ggplot2::geom_point(ggplot2::aes(y = retention), size = 3, alpha = 0.7) +
+  ggplot2::ggplot(d, ggplot2::aes(x = .data$mid_days)) +
+    ggplot2::geom_point(ggplot2::aes(y = .data$retention), size = 3, alpha = 0.7) +
     ggplot2::geom_errorbar(
-      ggplot2::aes(ymin = retention - 1.96 * se, ymax = retention + 1.96 * se),
+      ggplot2::aes(ymin = .data$retention - 1.96 * .data$se, 
+                   ymax = .data$retention + 1.96 * .data$se),
       width = 0.1, alpha = 0.5
     ) +
-    ggplot2::geom_line(ggplot2::aes(y = fitted_retention, color = "Your Curve"),
+    ggplot2::geom_line(ggplot2::aes(y = .data$fitted_retention, color = "Your Curve"),
                        linewidth = 1.2) +
-    ggplot2::geom_line(ggplot2::aes(y = fsrs_default, color = "FSRS Default"),
+    ggplot2::geom_line(ggplot2::aes(y = .data$fsrs_default, color = "FSRS Default"),
                        linewidth = 1, linetype = "dashed") +
     ggplot2::scale_color_manual(
       values = c("Your Curve" = "#3498db", "FSRS Default" = "#e74c3c")

@@ -1,11 +1,12 @@
 # ankiR
 
 <!-- badges: start -->
+[![Anki Addon](https://img.shields.io/badge/Anki-ankiR%20Stats-blue)](https://github.com/chrislongros/ankir-stats)
 [![R-CMD-check](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml)
 [![r-universe](https://cran.r-universe.dev/badges/ankiR)](https://cran.r-universe.dev/ankiR)
 <!-- badges: end -->
 
-Comprehensive R toolkit for reading, analyzing, and visualizing [Anki](https://apps.ankiweb.net/) flashcard collection databases. **133 functions** with full support for FSRS (Free Spaced Repetition Scheduler).
+Comprehensive R toolkit for reading, analyzing, and visualizing [Anki](https://apps.ankiweb.net/) flashcard collection databases. **135 functions** for collection analysis. For FSRS algorithm implementation, see [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs).
 
 ## Installation
 
@@ -35,6 +36,23 @@ anki_report()
 # Collection health check (0-100 score)
 anki_health_check()
 ```
+
+## Core Functions (Start Here)
+
+| Function | Description |
+|----------|-------------|
+| `anki_quick_summary()` | One-line collection overview |
+| `anki_report()` | Comprehensive statistics |
+| `anki_health_check()` | Collection health score (0-100) |
+| `anki_cards()` | Read all cards |
+| `anki_notes()` | Read all notes |
+| `anki_revlog()` | Read review history |
+| `anki_retention_rate()` | Calculate retention |
+| `anki_streak()` | Current study streak |
+| `anki_plot_heatmap()` | Review calendar heatmap |
+| `anki_plot_retention()` | Retention over time |
+
+**Advanced users:** See full function list below for forecasting, burnout detection, A/B testing, gamification, and more.
 
 ## What's New in 0.6.0
 
@@ -118,16 +136,22 @@ anki_search_enhanced("deck:German OR deck:Spanish")
 anki_find_similar(1234567890, method = "tfidf")
 ```
 
-### Enhanced Simulation & Forecasting
+### Forecasting
 
 ```r
-# Monte Carlo simulation with confidence intervals
-fsrs_simulate_enhanced(days = 90, simulations = 100)
+# Monte Carlo forecasting (recommended for irregular study habits)
+mc <- anki_forecast_monte_carlo(days_ahead = 30, n_sim = 1000)
+mc$summary                           # Daily forecasts with CIs
+mc$prob_above(day = 7, threshold = 100)  # P(>100 reviews on day 7)
+anki_plot_monte_carlo(mc)            # Visualize with confidence bands
 
-# ARIMA/seasonal forecasting
-anki_forecast_enhanced("reviews", method = "seasonal")
+# Statistical forecasting (ARIMA, Holt-Winters, Seasonal)
+anki_forecast_enhanced(method = "holt", days_ahead = 30)
 
-# Scenario-based workload projection
+# Compare methods
+anki_compare_forecasts(days_ahead = 14)
+
+# Scenario-based projections
 anki_workload_projection(days = 30)
 ```
 
@@ -171,15 +195,20 @@ anki_mature()        # Cards with ivl >= 21
 anki_due()           # Due for review
 ```
 
-### FSRS Support
+### FSRS Data Reading
+
+ankiR reads FSRS data from your Anki collection but does not implement the FSRS algorithm.
+For algorithm implementation, see [fsrs-r-pure](https://github.com/chrislongros/fsrs-r-pure).
 
 ```r
-anki_cards_fsrs()                    # Get FSRS parameters
-fsrs_current_retrievability()        # Current memory state
+anki_cards_fsrs()                    # Get cards with FSRS parameters
+fsrs_current_retrievability()        # Current memory state from DB
 fsrs_forgetting_index()              # % below target retention
-fsrs_time_to_mastery(deck = "Med")   # When will deck be learned?
-fsrs_review_burden()                 # Long-term workload estimate
-fsrs_compare_parameters()            # Compare to defaults
+fsrs_get_parameters()                # Read FSRS parameters from collection
+fsrs_compare_parameters()            # Compare your params to defaults
+fsrs_memory_states()                 # Get memory states for all cards
+fsrs_export_reviews()                # Export reviews for external optimizer
+fsrs_prepare_for_optimizer()         # Prepare data for fsrs-r-pure
 ```
 
 ### Comparative Analysis
@@ -221,16 +250,24 @@ anki_dashboard()  # Launches Shiny app
 | Recommendations | 4 | `anki_card_recommendations`, `anki_health_check`, `anki_summary`, `anki_today` |
 | Academic/Exam | 4 | `anki_exam_readiness`, `anki_coverage_analysis`, `anki_study_priorities`, `anki_study_plan` |
 | Plotting | 8 | `anki_plot_heatmap`, `anki_plot_retention`, `anki_plot_forecast` |
-| Time Series | 15 | `anki_ts_intervals`, `anki_ts_decompose`, `anki_forecast_enhanced` |
+| Time Series | 14 | `anki_ts_intervals`, `anki_ts_decompose`, `anki_forecast_enhanced` |
+| Forecasting | 3 | `anki_forecast_monte_carlo`, `anki_plot_monte_carlo`, `anki_compare_forecasts` |
+| Burnout/Quality | 2 | `anki_burnout_detection`, `anki_review_quality` |
+| Cohort/Velocity | 3 | `anki_cohort_analysis`, `anki_learning_velocity`, `anki_backlog_calculator` |
+| Gamification | 1 | `anki_gamification` (XP, levels, achievements) |
+| Streak Analytics | 1 | `anki_streak_analytics` |
+| Content Analysis | 1 | `anki_card_content` |
+| A/B Comparison | 2 | `anki_ab_comparison`, `anki_compare_groups` |
 | Compare | 5 | `anki_compare_decks`, `anki_compare_periods`, `anki_benchmark` |
 | Search | 9 | `anki_search`, `anki_search_enhanced`, `anki_find_similar` |
 | Quality | 6 | `anki_quality_report`, `anki_similar_cards`, `anki_tag_analysis` |
-| FSRS | 17 | `fsrs_retrievability`, `fsrs_compare_parameters`, `fsrs_memory_states` |
+| FSRS | 11 | `fsrs_get_parameters`, `fsrs_compare_parameters`, `fsrs_memory_states` |
 | Media | 5 | `anki_media_list`, `anki_media_unused`, `anki_media_missing` |
 | Export | 12 | `anki_to_csv`, `anki_to_obsidian_sr`, `anki_to_mochi`, `anki_to_json` |
-| Utilities | 6 | `anki_schema_version`, `anki_cache_enable`, `anki_quick_summary` |
+| Utilities | 4 | `anki_schema_version`, `anki_quick_summary`, `anki_today` |
 | Dashboard | 1 | `anki_dashboard` |
-| **Total** | **133** | |
+| Addon Import | 2 | `import_addon_export`, `analyze_addon_import` |
+| **Total** | **137** | |
 
 ## Requirements
 
@@ -238,9 +275,31 @@ anki_dashboard()  # Launches Shiny app
 - Anki 2.1+ (collection.anki2 format)
 - Optional: ggplot2 (plots), shiny (dashboard)
 
+## ankiR Stats Anki Addon
+
+The companion [ankiR Stats](https://github.com/chrislongros/ankir-stats) Anki addon provides in-app analytics with:
+
+- 📊 Overview stats, streaks, retention
+- 📈 Time series charts (reviews, retention, intervals)
+- 🗓️ GitHub-style review heatmap
+- 🔬 Time series decomposition
+- 🔥 Burnout detection
+- 🔮 Monte Carlo forecast (30-day prediction)
+- 🎮 Gamification (XP, levels, achievements)
+- 📦 Export for R analysis
+
+**Export to R:**
+```r
+# In Anki: Tools → ankiR Stats → Export for ankiR
+data <- ankiR::import_addon_export("ankir_export.json")
+data$summary
+data$daily_stats
+```
+
 ## Related Projects
 
-- [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs) - FSRS optimizer in R
+- [ankiR Stats](https://github.com/chrislongros/ankir-stats) - Anki addon with in-app analytics
+- [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs) - FSRS algorithm implementation (Rust bindings)
 - [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) - FSRS for Anki
 
 ## License
