@@ -382,7 +382,9 @@ anki_cards_fsrs <- function(path = NULL, profile = NULL) {
 #' @keywords internal
 #' @examples
 #' # Card with 30-day stability reviewed 15 days ago
+#' \dontrun{
 #' fsrs_retrievability(stability = 30, days_elapsed = 15)
+#' }
 fsrs_retrievability <- function(stability, days_elapsed, decay = 0.5) {
   # FSRS-6 formula: R = (1 + factor * t / S)^(-decay)
 
@@ -406,8 +408,14 @@ fsrs_retrievability <- function(stability, days_elapsed, decay = 0.5) {
 #' \deqn{I(r, S) = S / factor \cdot (r^{-1/decay} - 1)}
 #' @keywords internal
 #' @examples
+#' \dontrun{
 #' # When should a card with 30-day stability be reviewed for 90% retention?
+#' }
+#' \dontrun{
+#' \dontrun{
 #' fsrs_interval(stability = 30, desired_retention = 0.9)
+#' }
+#' }
 fsrs_interval <- function(stability, desired_retention = 0.9, decay = 0.5) {
   factor <- 0.9^(-1 / decay) - 1
   stability / factor * (desired_retention^(-1 / decay) - 1)

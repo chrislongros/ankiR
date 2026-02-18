@@ -1,7 +1,6 @@
 # ankiR
 
 <!-- badges: start -->
-[![Anki Addon](https://img.shields.io/badge/Anki-ankiR%20Stats-blue)](https://github.com/chrislongros/ankir-stats)
 [![R-CMD-check](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/chrislongros/ankiR/actions/workflows/R-CMD-check.yaml)
 [![r-universe](https://cran.r-universe.dev/badges/ankiR)](https://cran.r-universe.dev/ankiR)
 <!-- badges: end -->
@@ -275,30 +274,8 @@ anki_dashboard()  # Launches Shiny app
 - Anki 2.1+ (collection.anki2 format)
 - Optional: ggplot2 (plots), shiny (dashboard)
 
-## ankiR Stats Anki Addon
-
-The companion [ankiR Stats](https://github.com/chrislongros/ankir-stats) Anki addon provides in-app analytics with:
-
-- 📊 Overview stats, streaks, retention
-- 📈 Time series charts (reviews, retention, intervals)
-- 🗓️ GitHub-style review heatmap
-- 🔬 Time series decomposition
-- 🔥 Burnout detection
-- 🔮 Monte Carlo forecast (30-day prediction)
-- 🎮 Gamification (XP, levels, achievements)
-- 📦 Export for R analysis
-
-**Export to R:**
-```r
-# In Anki: Tools → ankiR Stats → Export for ankiR
-data <- ankiR::import_addon_export("ankir_export.json")
-data$summary
-data$daily_stats
-```
-
 ## Related Projects
 
-- [ankiR Stats](https://github.com/chrislongros/ankir-stats) - Anki addon with in-app analytics
 - [r-fsrs](https://github.com/open-spaced-repetition/r-fsrs) - FSRS algorithm implementation (Rust bindings)
 - [FSRS4Anki](https://github.com/open-spaced-repetition/fsrs4anki) - FSRS for Anki
 

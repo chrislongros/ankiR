@@ -29,5 +29,5 @@ Config/testthat/edition: 3
 URL: https://github.com/chrislongros/ankiR
 BugReports: https://github.com/chrislongros/ankiR/issues
 VignetteBuilder: knitr
-Repository: https://chrislongros.r-universe.dev
 Depends: R (>= 4.1.0)
+Language: en-US
