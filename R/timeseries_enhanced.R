@@ -229,32 +229,42 @@ forecast_holt <- function(y, h, confidence) {
   alpha <- 0.3
   beta <- 0.1
   
-  # Initialize
+  # Initialize. diff() on length-1 vector returns empty; guard against that.
   level <- y[1]
-  trend <- mean(diff(y[1:min(7, n)]))
-  
+  init_slice <- y[seq_len(min(7, n))]
+  trend <- if (length(init_slice) >= 2) {
+    mean(diff(init_slice), na.rm = TRUE)
+  } else 0
+  if (!is.finite(trend)) trend <- 0
+
   # Fit
-  for (i in 2:n) {
-    old_level <- level
-    level <- alpha * y[i] + (1 - alpha) * (level + trend)
-    trend <- beta * (level - old_level) + (1 - beta) * trend
+  if (n >= 2) {
+    for (i in 2:n) {
+      old_level <- level
+      level <- alpha * y[i] + (1 - alpha) * (level + trend)
+      trend <- beta * (level - old_level) + (1 - beta) * trend
+    }
   }
   
   # Forecast
   forecast <- level + (1:h) * trend
   
   # Variance
-  residuals <- numeric(n - 1)
-  fit_level <- y[1]
-  fit_trend <- trend
-  for (i in 2:n) {
-    residuals[i - 1] <- y[i] - (fit_level + fit_trend)
-    old_level <- fit_level
-    fit_level <- alpha * y[i] + (1 - alpha) * (fit_level + fit_trend)
-    fit_trend <- beta * (fit_level - old_level) + (1 - beta) * fit_trend
-  }
-  
-  sigma <- sd(residuals, na.rm = TRUE)
+  residuals <- if (n >= 2) {
+    r <- numeric(n - 1)
+    fit_level <- y[1]
+    fit_trend <- trend
+    for (i in 2:n) {
+      r[i - 1] <- y[i] - (fit_level + fit_trend)
+      old_level <- fit_level
+      fit_level <- alpha * y[i] + (1 - alpha) * (fit_level + fit_trend)
+      fit_trend <- beta * (fit_level - old_level) + (1 - beta) * fit_trend
+    }
+    r
+  } else 0
+
+  sigma <- if (length(residuals) >= 2) sd(residuals, na.rm = TRUE) else 0
+  if (!is.finite(sigma)) sigma <- 0
   z <- qnorm((1 + confidence) / 2)
   se <- sigma * sqrt(1:h)
   
@@ -275,8 +285,14 @@ forecast_seasonal <- function(y, h, confidence) {
   by_weekday <- split(y, weekdays)
   seasonal <- sapply(by_weekday, mean, na.rm = TRUE)
   overall_mean <- mean(y, na.rm = TRUE)
+  if (!is.finite(overall_mean) || overall_mean <= 0) {
+    # Degenerate series: fall back to plain Holt
+    return(forecast_holt(y, h, confidence))
+  }
   seasonal_factors <- seasonal / overall_mean
-  
+  # Guard against weekdays with zero history (would divide by zero below)
+  seasonal_factors[!is.finite(seasonal_factors) | seasonal_factors <= 0] <- 1
+
   # Deseasonalize
   y_deseasonalized <- y / seasonal_factors[weekdays]
   
@@ -389,8 +405,8 @@ anki_workload_projection <- function(path = NULL, profile = NULL,
   daily <- anki_stats_daily(path = col$path)
   avg_reviews <- mean(tail(daily$reviews, 30), na.rm = TRUE)
   
-  # Current due load
-  today_num <- as.numeric(Sys.Date() - as.Date("1970-01-01"))
+  # Current due load (card.due for queue 2 is days since collection creation)
+  today_num <- col_today_days(col$crt)
   current_due <- sum(cards$queue == 2 & cards$due <= today_num)
   
   # New cards remaining

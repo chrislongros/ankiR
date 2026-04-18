@@ -62,37 +62,41 @@ anki_search_enhanced <- function(pattern, path = NULL, profile = NULL,
   cards <- merge(cards, models[, c("mid", "name")], by = "mid", all.x = TRUE)
   names(cards)[names(cards) == "name"] <- "model_name"
   
+  today_days <- col_today_days(col$crt)
+
   # Handle OR operator - split into sub-searches
   if (grepl("\\bOR\\b", pattern, ignore.case = TRUE)) {
     parts <- strsplit(pattern, "\\s+OR\\s+", perl = TRUE)[[1]]
     results <- lapply(parts, function(p) {
       tryCatch(
-        search_single_pattern(p, cards, revlog, case_sensitive),
+        search_single_pattern(p, cards, revlog, case_sensitive, today_days),
         error = function(e) integer(0)
       )
     })
     matching_indices <- unique(unlist(results))
     return(tibble::as_tibble(cards[matching_indices, ]))
   }
-  
+
   # Single pattern search
-  matching_indices <- search_single_pattern(pattern, cards, revlog, case_sensitive)
+  matching_indices <- search_single_pattern(pattern, cards, revlog,
+                                            case_sensitive, today_days)
   tibble::as_tibble(cards[matching_indices, ])
 }
 
 #' Internal function to search a single pattern
 #' @noRd
-search_single_pattern <- function(pattern, cards, revlog, case_sensitive) {
+search_single_pattern <- function(pattern, cards, revlog, case_sensitive,
+                                  today_days = NULL) {
   # Parse operators from pattern
   operators <- parse_search_operators(pattern)
-  
+
   # Start with all cards
   mask <- rep(TRUE, nrow(cards))
-  
+
   for (op in operators) {
-    mask <- mask & apply_operator(op, cards, revlog, case_sensitive)
+    mask <- mask & apply_operator(op, cards, revlog, case_sensitive, today_days)
   }
-  
+
   which(mask)
 }
 
@@ -154,8 +158,12 @@ parse_search_operators <- function(pattern) {
 
 #' Apply a single operator to filter cards
 #' @noRd
-apply_operator <- function(op, cards, revlog, case_sensitive) {
+apply_operator <- function(op, cards, revlog, case_sensitive,
+                           today_days = NULL) {
   n <- nrow(cards)
+  if (is.null(today_days)) {
+    today_days <- as.numeric(Sys.Date() - as.Date("1970-01-01"))
+  }
   
   switch(op$type,
     "added" = {
@@ -261,7 +269,7 @@ apply_operator <- function(op, cards, revlog, case_sensitive) {
         "new" = cards$queue == 0,
         "learn" = cards$queue == 1 | cards$queue == 3,
         "review" = cards$queue == 2,
-        "due" = cards$queue == 2 & cards$due <= as.numeric(Sys.Date() - as.Date("1970-01-01")),
+        "due" = cards$queue == 2 & cards$due <= today_days,
         "suspended" = cards$queue == -1,
         "buried" = cards$queue == -2 | cards$queue == -3,
         "leech" = cards$lapses >= 8,

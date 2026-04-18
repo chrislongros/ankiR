@@ -19,7 +19,7 @@ ankiR provides a tidy interface for reading Anki flashcard databases in R. This 
 
 ## Installation
 
-```{r install}
+```{r install, eval = FALSE, purl = FALSE}
 # From CRAN
 install.packages("ankiR")
 
@@ -94,8 +94,10 @@ cards <- anki_cards()
 # nid: Note ID (links to notes table)
 # did: Deck ID
 # type: 0=new, 1=learning, 2=review, 3=relearning
-# queue: -1=suspended, 0=new, 1=learning, 2=review
-# due: Due date/position
+# queue: -3=user-buried, -2=sibling-buried, -1=suspended, 0=new,
+#        1=learning, 2=review, 3=day-learning, 4=preview
+# due: Position (queue 0), seconds-epoch (queue 1), or
+#      days since collection creation (queue 2)
 # ivl: Current interval in days
 # reps: Number of reviews
 # lapses: Number of times forgotten

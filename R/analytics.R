@@ -208,12 +208,24 @@ anki_stats_daily <- function(path = NULL, profile = NULL, from = NULL, to = NULL
       hard = integer(),
       good = integer(),
       easy = integer(),
+      learned = integer(),
       retention = numeric()
     ))
   }
- 
-  # Aggregate by date
+
+  has_rtype <- "review_type" %in% names(revlog)
+
+  # Aggregate by date.
+  # retention is restricted to review-queue reviews (review_type == 1) when
+  # that column is available; otherwise falls back to all reviews.
   stats <- lapply(split(revlog, revlog$review_date), function(d) {
+    review_only <- if (has_rtype) d[d$review_type == 1, ] else d
+    retention <- if (nrow(review_only) > 0) {
+      1 - sum(review_only$ease == 1) / nrow(review_only)
+    } else NA_real_
+    learned <- if (has_rtype) {
+      length(unique(d$cid[d$review_type == 0]))
+    } else 0L
     tibble::tibble(
       reviews = nrow(d),
       time_minutes = sum(d$time, na.rm = TRUE) / 60000,
@@ -221,15 +233,16 @@ anki_stats_daily <- function(path = NULL, profile = NULL, from = NULL, to = NULL
       hard = sum(d$ease == 2),
       good = sum(d$ease == 3),
       easy = sum(d$ease == 4),
-      retention = 1 - sum(d$ease == 1) / nrow(d)
+      learned = learned,
+      retention = retention
     )
   })
- 
+
   result <- do.call(rbind, stats)
   result$date <- as.Date(names(stats))
- 
+
   tibble::as_tibble(result[, c("date", "reviews", "time_minutes", "again",
-                               "hard", "good", "easy", "retention")])
+                               "hard", "good", "easy", "learned", "retention")])
 }
 
 #' Calculate actual retention rate from review history
@@ -240,6 +253,9 @@ anki_stats_daily <- function(path = NULL, profile = NULL, from = NULL, to = NULL
 #' @param profile Profile name (first profile if NULL)
 #' @param days Number of days to look back (default 30, NULL for all)
 #' @param by_deck If TRUE, calculate retention per deck
+#' @param queue_only If TRUE (default), only count reviews from the review
+#'   queue (\code{review_type == 1}), matching Anki's own retention
+#'   definition. Set FALSE to include learning/relearning reviews.
 #' @return A tibble with retention statistics
 #' @export
 #' @examples
@@ -247,22 +263,27 @@ anki_stats_daily <- function(path = NULL, profile = NULL, from = NULL, to = NULL
 #' retention <- anki_retention_rate()
 #' retention <- anki_retention_rate(days = 90, by_deck = TRUE)
 #' }
-anki_retention_rate <- function(path = NULL, profile = NULL, days = 30, by_deck = FALSE) {
+anki_retention_rate <- function(path = NULL, profile = NULL, days = 30,
+                                by_deck = FALSE, queue_only = TRUE) {
   col <- anki_collection(path, profile)
   on.exit(col$close())
- 
+
   revlog <- col$revlog()
- 
+
   # Filter by date
   if (!is.null(days)) {
     cutoff <- Sys.Date() - days
     revlog <- revlog[revlog$review_date >= cutoff, ]
   }
- 
+
+  if (queue_only && "review_type" %in% names(revlog)) {
+    revlog <- revlog[revlog$review_type == 1, ]
+  }
+
   if (nrow(revlog) == 0) {
     return(tibble::tibble(retention = NA_real_, total_reviews = 0L))
   }
- 
+
   if (!by_deck) {
     return(tibble::tibble(
       retention = 1 - sum(revlog$ease == 1) / nrow(revlog),
@@ -271,13 +292,13 @@ anki_retention_rate <- function(path = NULL, profile = NULL, days = 30, by_deck 
       passed = sum(revlog$ease > 1)
     ))
   }
- 
+
   # By deck requires joining with cards
   cards <- col$cards()
   decks <- col$decks()
- 
+
   revlog <- merge(revlog, cards[, c("cid", "did")], by = "cid", all.x = TRUE)
- 
+
   stats <- lapply(split(revlog, revlog$did), function(d) {
     tibble::tibble(
       retention = 1 - sum(d$ease == 1) / nrow(d),

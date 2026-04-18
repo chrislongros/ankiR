@@ -4,7 +4,13 @@
 \alias{anki_retention_rate}
 \title{Calculate actual retention rate from review history}
 \usage{
-anki_retention_rate(path = NULL, profile = NULL, days = 30, by_deck = FALSE)
+anki_retention_rate(
+  path = NULL,
+  profile = NULL,
+  days = 30,
+  by_deck = FALSE,
+  queue_only = TRUE
+)
 }
 \arguments{
 \item{path}{Path to collection.anki2 (auto-detected if NULL)}
@@ -14,6 +20,10 @@ anki_retention_rate(path = NULL, profile = NULL, days = 30, by_deck = FALSE)
 \item{days}{Number of days to look back (default 30, NULL for all)}
 
 \item{by_deck}{If TRUE, calculate retention per deck}
+
+\item{queue_only}{If TRUE (default), only count reviews from the review
+queue (\code{review_type == 1}), matching Anki's own retention
+definition. Set FALSE to include learning/relearning reviews.}
 }
 \value{
 A tibble with retention statistics

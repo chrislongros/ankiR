@@ -39,16 +39,18 @@ anki_search <- function(query, path = NULL, profile = NULL) {
   terms <- strsplit(query, "\\s+")[[1]]
   mask <- rep(TRUE, nrow(cards))
  
+  today_days <- col_today_days(col$crt)
+
   for (term in terms) {
-    term_mask <- parse_search_term(term, cards)
+    term_mask <- parse_search_term(term, cards, today_days = today_days)
     mask <- mask & term_mask
   }
- 
+
   tibble::as_tibble(cards[mask, ])
 }
 
 #' @keywords internal
-parse_search_term <- function(term, cards) {
+parse_search_term <- function(term, cards, today_days = NULL) {
   # Handle negation
   negate <- FALSE
   if (startsWith(term, "-")) {
@@ -82,8 +84,10 @@ parse_search_term <- function(term, cards) {
     mask <- cards$queue == -2 | cards$queue == -3
    
   } else if (term == "is:due") {
-    # Cards that are due today or overdue
-    mask <- cards$queue == 2 & cards$due <= as.integer(Sys.Date())
+    # Cards that are due today or overdue.
+    # card.due for queue 2 is integer days since col.crt, not Unix epoch.
+    if (is.null(today_days)) today_days <- as.integer(Sys.Date())
+    mask <- cards$queue == 2 & cards$due <= today_days
    
   } else if (startsWith(term, "prop:")) {
     prop_expr <- substring(term, 6)

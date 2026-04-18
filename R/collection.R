@@ -37,18 +37,23 @@ anki_collection <- function(path = NULL, profile = NULL) {
   }
 
 
-  if (!grepl("\\.anki2[1]?$", path, ignore.case = TRUE)) {
-    warning("File doesn't have expected .anki2/.anki21 extension: ", path,
-            call. = FALSE)
+  if (!grepl("\\.anki2(1b?)?$", path, ignore.case = TRUE)) {
+    warning("File doesn't have expected .anki2/.anki21/.anki21b extension: ",
+            path, call. = FALSE)
   }
 
 
   con <- DBI::dbConnect(RSQLite::SQLite(), path, flags = RSQLite::SQLITE_RO)
 
+  crt <- tryCatch(
+    DBI::dbGetQuery(con, "SELECT crt FROM col LIMIT 1")$crt[1],
+    error = function(e) NA_real_
+  )
 
   structure(list(
     path = path,
     con = con,
+    crt = crt,
     notes = function() read_notes(con),
     cards = function() read_cards(con),
     revlog = function() read_revlog(con),
@@ -81,17 +86,25 @@ read_notes <- function(con) {
 #' @keywords internal
 read_cards <- function(con) {
   c <- DBI::dbReadTable(con, "cards")
-  tibble::tibble(
+  result <- tibble::tibble(
     cid = c$id,
     nid = c$nid,
     did = c$did,
+    ord = c$ord,
     type = c$type,
     queue = c$queue,
     due = c$due,
     ivl = c$ivl,
+    factor = c$factor,
     reps = c$reps,
-    lapses = c$lapses
+    lapses = c$lapses,
+    flags = c$flags,
+    card_created_date = anki_timestamp_to_date(c$id)
   )
+  if ("data" %in% names(c)) {
+    result$data_json <- c$data
+  }
+  result
 }
 
 #' @keywords internal
@@ -102,6 +115,7 @@ read_revlog <- function(con) {
     cid = r$cid,
     ease = r$ease,
     ivl = r$ivl,
+    lastIvl = r$lastIvl,
     time = r$time,
     review_date = anki_timestamp_to_date(r$id)
   )
@@ -410,11 +424,7 @@ fsrs_retrievability <- function(stability, days_elapsed, decay = 0.5) {
 #' @examples
 #' \dontrun{
 #' # When should a card with 30-day stability be reviewed for 90% retention?
-#' }
-#' \dontrun{
-#' \dontrun{
 #' fsrs_interval(stability = 30, desired_retention = 0.9)
-#' }
 #' }
 fsrs_interval <- function(stability, desired_retention = 0.9, decay = 0.5) {
   factor <- 0.9^(-1 / decay) - 1

@@ -39,6 +39,36 @@ date_to_anki_timestamp <- function(x) {
  as.numeric(as.POSIXct(x)) * 1000
 }
 
+#' Today expressed as days since collection creation
+#'
+#' Queue-2 cards store \code{due} as integer days since the collection was
+#' created (\code{col.crt}), not since the Unix epoch. Use this helper to
+#' compute a directly comparable "today" value.
+#'
+#' @param crt Collection creation timestamp in seconds (from \code{col$crt})
+#' @return Numeric, integer days since collection creation
+#' @keywords internal
+col_today_days <- function(crt) {
+  if (is.null(crt) || is.na(crt)) {
+    return(as.numeric(Sys.Date() - as.Date("1970-01-01")))
+  }
+  floor((as.numeric(Sys.time()) - crt) / 86400)
+}
+
+#' Convert Anki queue-2 due value to a Date
+#'
+#' @param due Numeric due value from the cards table (days since crt for
+#'   queue 2; absolute seconds for queue 1; position for queue 0)
+#' @param crt Collection creation timestamp in seconds
+#' @return Date, or NA if crt is missing
+#' @keywords internal
+due_to_date <- function(due, crt) {
+  if (is.null(crt) || is.na(crt)) {
+    return(as.Date(rep(NA, length(due))))
+  }
+  as.Date(as.POSIXct(crt + due * 86400, origin = "1970-01-01"))
+}
+
 #' Null coalescing operator
 #'
 #' Returns the left-hand side if not NULL, otherwise returns the right-hand side.
@@ -53,9 +83,9 @@ date_to_anki_timestamp <- function(x) {
 
 # Declare global variables to avoid R CMD check notes
 # These are column names used in ggplot2 aes() and data.frame operations
-utils::globalVariables(c(".data", 
-  "difficulty", "hour", "ivl", "name", "new_due", "quantile",
-  "reorder", "retention", "reviews", "rolling_retention", "sd",
+utils::globalVariables(c(".data",
+  "difficulty", "hour", "ivl", "name", "new_due",
+  "retention", "reviews", "rolling_retention",
   "stability", "total", "week", "weekday", "date", "value",
   "component", "cid", "did", "nid", "ease", "time", "review_date",
   "mid", "sfld", "flds", "tags", "lapses", "type", "queue",

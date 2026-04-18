@@ -285,9 +285,9 @@ anki_backlog_calculator <- function(path = NULL, profile = NULL,
   cards <- col$cards()
   revlog <- col$revlog()
   
-  today <- as.numeric(Sys.Date() - as.Date("1970-01-01"))
-  
-  # Current due counts
+  today <- col_today_days(col$crt)
+
+  # Current due counts (card.due for queue 2 is days since collection creation)
   due_now <- sum(cards$type == 2 & cards$due <= today, na.rm = TRUE)
   learning <- sum(cards$type %in% c(1, 3), na.rm = TRUE)
   new_cards <- sum(cards$type == 0, na.rm = TRUE)

@@ -27,7 +27,7 @@ library(ankiR)
 
 # One-liner overview
 anki_quick_summary()
-#> Anki: 5847 cards (4521 mature, 892 young, 434 new) | Due: 127 | Streak: 47 days | Retention: 91.2%
+#> Anki: 5847 cards (4521 mature, 892 young, 434 new) | Due today: 127 | Reviews today: 84 | Streak: 47 days | 7d retention: 91.2%
 
 # Detailed report
 anki_report()

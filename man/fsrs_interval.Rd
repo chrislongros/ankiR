@@ -27,11 +27,7 @@ Derived from the retrievability formula by solving for t:
 \examples{
 \dontrun{
 # When should a card with 30-day stability be reviewed for 90\% retention?
-}
-\dontrun{
-\dontrun{
 fsrs_interval(stability = 30, desired_retention = 0.9)
-}
 }
 }
 \keyword{internal}

@@ -14,14 +14,14 @@
 anki_schema_version <- function(path = NULL, profile = NULL) {
   col <- anki_collection(path, profile)
   on.exit(col$close())
-  
-  db <- col$db
-  
+
+  db <- col$con
+
   # Get schema version from col table
   schema_ver <- tryCatch({
     res <- DBI::dbGetQuery(db, "SELECT ver FROM col")
     res$ver[1]
-  }, error = function(e) NA)
+  }, error = function(e) NA_integer_)
   
   # Check for FSRS data columns
   card_cols <- DBI::dbListFields(db, "cards")
@@ -46,20 +46,22 @@ anki_schema_version <- function(path = NULL, profile = NULL) {
     as.POSIXct(col_data$mod[1] / 1000, origin = "1970-01-01")
   } else NA
   
+  ver_ge <- function(v) !is.na(schema_ver) && schema_ver >= v
+
   # Detect Anki version features
   features <- list(
     fsrs = has_fsrs,
-    deck_config_in_json = "dconf" %in% tables || schema_ver >= 11,
+    deck_config_in_json = "dconf" %in% tables || ver_ge(11),
     media_db = file.exists(file.path(dirname(col$path), "media.db2")),
-    new_scheduler = "originalDue" %in% revlog_cols || schema_ver >= 18
+    new_scheduler = "originalDue" %in% revlog_cols || ver_ge(18)
   )
-  
+
   # Determine approximate Anki version
-  anki_version <- if (schema_ver >= 18) {
+  anki_version <- if (ver_ge(18)) {
     "Anki 23.10+ (v3 scheduler, FSRS support)"
-  } else if (schema_ver >= 15) {
+  } else if (ver_ge(15)) {
     "Anki 2.1.45+ (v3 scheduler)"
-  } else if (schema_ver >= 11) {
+  } else if (ver_ge(11)) {
     "Anki 2.1.x"
   } else {
     "Legacy Anki"
@@ -108,8 +110,8 @@ anki_quick_summary <- function(path = NULL, profile = NULL, print = TRUE) {
   new_cards <- sum(cards$queue == 0)
   suspended <- sum(cards$queue == -1)
   
-  # Due today
-  today <- as.numeric(Sys.Date() - as.Date("1970-01-01"))
+  # Due today (card.due for queue 2 is days since collection creation)
+  today <- col_today_days(col$crt)
   due_today <- sum(cards$queue == 2 & cards$due <= today)
   
   # Reviews today
@@ -139,15 +141,15 @@ anki_quick_summary <- function(path = NULL, profile = NULL, print = TRUE) {
     suspended = suspended,
     due_today = due_today,
     reviews_today = reviews_today,
-    current_streak = streak$current,
+    current_streak = streak$current_streak,
     retention_7d = retention_7d
   )
-  
+
   if (print) {
     cat(sprintf(
       "Anki: %d cards (%d mature, %d young, %d new) | Due today: %d | Reviews today: %d | Streak: %d days | 7d retention: %s%%\n",
       total_cards, mature, young, new_cards, due_today, reviews_today,
-      streak$current, ifelse(is.na(retention_7d), "N/A", retention_7d)
+      streak$current_streak, ifelse(is.na(retention_7d), "N/A", retention_7d)
     ))
   }
   
@@ -190,30 +192,42 @@ anki_today <- function(path = NULL, profile = NULL) {
   ease_breakdown <- table(factor(today_revs$ease, levels = 1:4))
   names(ease_breakdown) <- c("Again", "Hard", "Good", "Easy")
   
-  # Breakdown by type
-  type_breakdown <- table(factor(today_revs$type, levels = 0:3))
-  names(type_breakdown) <- c("Learning", "Review", "Relearn", "Filtered")
-  
+  # Breakdown by type (revlog stores type as review_type in our tibble)
+  has_rtype <- "review_type" %in% names(today_revs)
+  if (has_rtype) {
+    type_breakdown <- table(factor(today_revs$review_type, levels = 0:3))
+    names(type_breakdown) <- c("Learning", "Review", "Relearn", "Filtered")
+  } else {
+    type_breakdown <- list()
+  }
+
   # Time spent
   time_spent_sec <- sum(today_revs$time) / 1000
   time_spent_min <- time_spent_sec / 60
-  
+
   # Unique cards
   unique_cards <- length(unique(today_revs$cid))
-  
-  # Retention
-  review_revs <- today_revs[today_revs$type == 1, ]
+
+  # Retention (only true review queue, review_type == 1)
+  review_revs <- if (has_rtype) {
+    today_revs[today_revs$review_type == 1, ]
+  } else {
+    today_revs[0, ]
+  }
   retention <- if (nrow(review_revs) > 0) {
     round(sum(review_revs$ease > 1) / nrow(review_revs) * 100, 1)
   } else NA
-  
+
   # Average time per card
   avg_time <- mean(today_revs$time) / 1000
-  
-  # Due remaining
-  today_num <- as.numeric(today - as.Date("1970-01-01"))
-  due_remaining <- sum(cards$queue == 2 & cards$due <= today_num) - 
-    length(unique(today_revs$cid[today_revs$type == 1]))
+
+  # Due remaining (card.due for queue 2 is days since collection creation)
+  today_num <- col_today_days(col$crt)
+  reviewed_cids <- if (has_rtype) {
+    unique(today_revs$cid[today_revs$review_type == 1])
+  } else character(0)
+  due_remaining <- sum(cards$queue == 2 & cards$due <= today_num) -
+    length(reviewed_cids)
   due_remaining <- max(0, due_remaining)
   
   list(
