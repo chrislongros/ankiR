@@ -1,3 +1,44 @@
+# ankiR 0.6.5
+
+## Bug Fixes
+
+* Corrected `cards.due` interpretation across the package: for queue-2
+  cards, `due` is days since collection creation (`col.crt`), not days
+  since the Unix epoch. Fixes `is:due` / `due_today` in
+  `anki_search()`, `anki_search_enhanced()`, `anki_quick_summary()`,
+  `anki_today()`, `anki_backlog_calculator()`, and
+  `anki_workload_projection()`. On long-running collections this
+  could shift counts by hundreds of days.
+* `anki_retention_rate()` gained `queue_only = TRUE` (default) to
+  restrict retention to review-queue reviews (`review_type == 1`),
+  matching Anki's own definition. Same correction applied internally
+  in `anki_stats_daily()` and `anki_quick_summary()`.
+* `anki_schema_version()`: use the correct connection slot
+  (`col$con`); previously errored on every call.
+* `anki_quick_summary()`: streak field name (was `NA days`).
+* `anki_today()`: filter on `review_type`, not the non-existent
+  `type` column on revlog tibbles.
+* `read_revlog()` now projects `lastIvl`, unblocking
+  `anki_ts_learning()` and `anki_ts_maturation()`.
+* `read_cards()` now projects `ord`, `factor`, `flags`,
+  `card_created_date`, and `data_json`, unblocking
+  `anki_search_enhanced()` operators `added:`, `card:N`,
+  `prop:ease`, and `flag:N`.
+* `anki_stats_daily()` gained a `learned` column, fixing the
+  `cards_learned` metric in `anki_forecast_enhanced()`.
+* Forecast helpers (`forecast_seasonal`, `forecast_holt`) now guard
+  against degenerate series (zero-history weekdays, n < 2).
+* Collection opener now accepts `.anki21b` files.
+
+## Misc
+
+* Added `importFrom(stats, sd/quantile/reorder/var)` for R CMD check
+  cleanliness; removed function names from `globalVariables()`.
+* Fixed malformed nested `\dontrun` in `fsrs_interval()` docs.
+* Vignette: `install.packages` chunk no longer tries to hit CRAN
+  during `R CMD check`; queue/due value docs expanded.
+* README: `anki_quick_summary()` example now matches real output.
+
 # ankiR 0.6.0
 
 ## Major New Features

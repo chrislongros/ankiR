@@ -1,6 +1,6 @@
 Package: ankiR
 Title: Read and Analyze 'Anki' Flashcard Databases
-Version: 0.6.0
+Version: 0.6.5
 Authors@R: person("Christos", "Longros", email = "chris.longros@gmail.com",
     role = c("aut", "cre"))
 Description: Comprehensive toolkit for reading and analyzing 'Anki'
