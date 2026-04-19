@@ -302,7 +302,7 @@ anki_health_check <- function(path = NULL, profile = NULL) {
   }
 
   # Check 7: Overdue cards
-  today <- as.integer(Sys.Date())
+  today <- col_today_days(col$crt)
   overdue <- sum(cards$queue == 2 & cards$due < today - 7)
 
   if (overdue > 100) {
@@ -442,7 +442,7 @@ anki_summary <- function(path = NULL, profile = NULL) {
   reviews_today <- nrow(today_revlog)
 
   # Due today
-  today <- as.integer(Sys.Date())
+  today <- col_today_days(col$crt)
   due_today <- sum(cards$queue == 2 & cards$due <= today)
 
   tibble::tibble(
@@ -459,68 +459,3 @@ anki_summary <- function(path = NULL, profile = NULL) {
   )
 }
 
-#' Today's activity summary
-#'
-#' Returns what happened today in your Anki studies.
-#'
-#' @param path Path to collection.anki2 (auto-detected if NULL)
-#' @param profile Profile name (first profile if NULL)
-#' @return A list with today's stats
-#' @export
-#' @examples
-#' \dontrun{
-#' anki_today()
-#' }
-anki_today <- function(path = NULL, profile = NULL) {
-  col <- anki_collection(path, profile)
-  on.exit(col$close())
-
-  cards <- col$cards()
-  revlog <- col$revlog()
-
-  # Today's reviews
-  today_revlog <- revlog[revlog$review_date == Sys.Date(), ]
-
-  if (nrow(today_revlog) == 0) {
-    return(list(
-      studied_today = FALSE,
-      message = "No reviews yet today",
-      due_remaining = sum(cards$queue == 2 & cards$due <= as.integer(Sys.Date()))
-    ))
-  }
-
-  # Stats
-  retention <- round((1 - sum(today_revlog$ease == 1) / nrow(today_revlog)) * 100, 1)
-  time_min <- round(sum(today_revlog$time, na.rm = TRUE) / 60000, 1)
-  unique_cards <- length(unique(today_revlog$cid))
-
-  # Due remaining
-  today <- as.integer(Sys.Date())
-  due_remaining <- sum(cards$queue == 2 & cards$due <= today) -
-                   sum(today_revlog$cid %in% cards$cid[cards$queue == 2])
-  due_remaining <- max(0, due_remaining)
-
-  list(
-    studied_today = TRUE,
-    stats = tibble::tibble(
-      metric = c("Reviews", "Unique Cards", "Time (min)", "Retention (%)",
-                 "Again", "Hard", "Good", "Easy"),
-      value = c(
-        nrow(today_revlog),
-        unique_cards,
-        time_min,
-        retention,
-        sum(today_revlog$ease == 1),
-        sum(today_revlog$ease == 2),
-        sum(today_revlog$ease == 3),
-        sum(today_revlog$ease == 4)
-      )
-    ),
-    due_remaining = due_remaining,
-    message = if (due_remaining == 0) {
-      "All reviews complete for today!"
-    } else {
-      paste(due_remaining, "cards still due")
-    }
-  )
-}

@@ -266,29 +266,27 @@ anki_export_revlog <- function(file, path = NULL, profile = NULL, include_card_i
 #' forecast <- anki_forecast()
 #' }
 anki_forecast <- function(path = NULL, profile = NULL, days = 30) {
-  cards <- anki_cards(path, profile)
- 
+  col <- anki_collection(path, profile)
+  on.exit(col$close())
+  cards <- col$cards()
+
   # Filter to review cards
   cards <- cards[cards$type == 2 & cards$queue == 2, ]
- 
+
   if (nrow(cards) == 0) {
     return(tibble::tibble(
       date = Sys.Date() + seq_len(days) - 1,
       due = rep(0L, days)
     ))
   }
- 
-  # Estimate due dates (simplified)
-  # Note: This is approximate since Anki's due field interpretation varies
-  today <- as.integer(Sys.Date())
- 
+
+  today <- col_today_days(col$crt)
+
   forecast <- vapply(seq_len(days), function(d) {
     target_day <- today + d - 1
-    # Cards due on or before this day
     sum(cards$due <= target_day)
   }, FUN.VALUE = integer(1))
- 
-  # Convert to new cards due per day
+
   new_due <- c(forecast[1], diff(forecast))
  
   tibble::tibble(

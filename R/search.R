@@ -84,9 +84,10 @@ parse_search_term <- function(term, cards, today_days = NULL) {
     mask <- cards$queue == -2 | cards$queue == -3
    
   } else if (term == "is:due") {
-    # Cards that are due today or overdue.
-    # card.due for queue 2 is integer days since col.crt, not Unix epoch.
-    if (is.null(today_days)) today_days <- as.integer(Sys.Date())
+    if (is.null(today_days)) {
+      stop("parse_search_term(): today_days must be supplied for 'is:due' ",
+           "(caller must compute col_today_days(col$crt))", call. = FALSE)
+    }
     mask <- cards$queue == 2 & cards$due <= today_days
    
   } else if (startsWith(term, "prop:")) {
@@ -247,9 +248,7 @@ anki_due <- function(path = NULL, profile = NULL, days_ahead = 0) {
  
   cards <- col$cards()
  
-  # Review cards: due is day number since collection creation
-  # For simplicity, filter by queue = 2 (review queue) and approximate
-  today <- as.integer(Sys.Date())
+  today <- col_today_days(col$crt)
   cutoff <- today + days_ahead
  
   review_due <- cards$queue == 2 & cards$due <= cutoff

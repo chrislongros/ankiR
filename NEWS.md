@@ -1,3 +1,19 @@
+# ankiR 0.6.6
+
+## Bug Fixes
+
+* `cards.due` epoch fixes missed by 0.6.5: `anki_study_plan()`,
+  `anki_forecast()`, `anki_simulate_session()`, `anki_health_check()`,
+  `anki_quick_summary()`, `anki_due()`. All now use
+  `col_today_days(col$crt)`. Also removed a duplicate `anki_today()`
+  in `recommendations.R` that was shadowed at load time by the active
+  definition in `simulation_enhanced.R`.
+* `anki_to_obsidian_sr(include_scheduling = TRUE)`: `sr-due` computed
+  with `due_to_date()` and gated on queue 2. `Sys.Date() + due` put
+  dates years in the future on non-fresh collections.
+* `parse_search_term()` and `apply_operator()` error if `today_days`
+  is missing instead of falling back to `as.integer(Sys.Date())`.
+
 # ankiR 0.6.5
 
 ## Bug Fixes

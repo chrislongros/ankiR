@@ -463,7 +463,7 @@ anki_study_plan <- function(path = NULL, profile = NULL, target_date,
   # Current status
   new_cards <- sum(cards$type == 0 & cards$queue != -1)
   review_cards <- sum(cards$type == 2 & cards$queue != -1)
-  due_today <- sum(cards$queue == 2 & cards$due <= as.integer(Sys.Date()))
+  due_today <- sum(cards$queue == 2 & cards$due <= col_today_days(col$crt))
 
   # Calculate phases
   # Phase 1: Catch up on reviews

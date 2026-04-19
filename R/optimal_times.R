@@ -375,7 +375,7 @@ anki_simulate_session <- function(path = NULL, profile = NULL, minutes = 30,
   }
 
   # Count current due cards
-  today <- as.integer(Sys.Date())
+  today <- col_today_days(col$crt)
   due_review <- sum(cards$queue == 2 & cards$due <= today)
   due_learn <- sum(cards$queue %in% c(1, 3))
   new_cards <- sum(cards$type == 0)

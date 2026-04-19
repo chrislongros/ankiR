@@ -107,10 +107,10 @@ anki_to_obsidian_sr <- function(path = NULL, profile = NULL,
       frontmatter <- ""
       if (include_scheduling) {
         card_data <- cards[cards$nid == note$nid, ]
-        if (nrow(card_data) > 0) {
+        if (nrow(card_data) > 0 && card_data$queue[1] == 2) {
           frontmatter <- paste0(
             "---\n",
-            "sr-due: ", Sys.Date() + card_data$due[1], "\n",
+            "sr-due: ", due_to_date(card_data$due[1], col$crt), "\n",
             "sr-interval: ", card_data$ivl[1], "\n",
             "sr-ease: ", 250, "\n",
             "---\n\n"

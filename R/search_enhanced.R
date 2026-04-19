@@ -162,7 +162,8 @@ apply_operator <- function(op, cards, revlog, case_sensitive,
                            today_days = NULL) {
   n <- nrow(cards)
   if (is.null(today_days)) {
-    today_days <- as.numeric(Sys.Date() - as.Date("1970-01-01"))
+    stop("apply_operator(): today_days must be supplied ",
+         "(caller must compute col_today_days(col$crt))", call. = FALSE)
   }
   
   switch(op$type,
