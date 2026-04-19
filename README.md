@@ -54,7 +54,89 @@ anki_health_check()
 
 **Advanced users:** See full function list below for forecasting, burnout detection, A/B testing, gamification, and more.
 
-## What's New in 0.6.0
+## Core Features
+
+### Search (Anki-like syntax)
+
+```r
+anki_search("deck:Medical tag:cardiology")
+anki_search("is:due -is:suspended prop:ivl>30")
+
+anki_leeches()       # Problem cards
+anki_mature()        # Cards with ivl >= 21
+anki_due()           # Due for review
+```
+
+### FSRS Data Reading
+
+ankiR reads FSRS data from your Anki collection but does not implement the FSRS algorithm.
+For algorithm implementation, see [fsrs-r-pure](https://github.com/chrislongros/fsrs-r-pure).
+
+```r
+anki_cards_fsrs()                    # Get cards with FSRS parameters
+fsrs_current_retrievability()        # Current memory state from DB
+fsrs_forgetting_index()              # % below target retention
+fsrs_get_parameters()                # Read FSRS parameters from collection
+fsrs_compare_parameters()            # Compare your params to defaults
+fsrs_memory_states()                 # Get memory states for all cards
+fsrs_export_reviews()                # Export reviews for external optimizer
+fsrs_prepare_for_optimizer()         # Prepare data for fsrs-r-pure
+```
+
+### Comparative Analysis
+
+```r
+anki_compare_periods()    # This month vs last month
+anki_compare_decks()      # Side-by-side deck stats
+anki_benchmark()          # Compare to FSRS averages
+```
+
+### Export
+
+```r
+anki_to_csv("Medical", "medical.csv")
+anki_to_org("Medical", "medical.org")
+anki_to_markdown("Medical", "medical.md", format = "obsidian")
+anki_to_obsidian_sr("Medical", "medical_sr.md")
+anki_to_mochi("Medical", "medical.json")
+anki_to_json(output = "collection.json")
+anki_progress_report(format = "html")
+```
+
+### Interactive Dashboard
+
+```r
+anki_dashboard()  # Launches Shiny app
+```
+
+## Visualizations
+
+```r
+anki_plot_heatmap()           # Calendar heatmap
+anki_plot_retention()         # Retention over time
+anki_plot_forecast()          # Upcoming workload
+anki_plot_difficulty()        # FSRS difficulty distribution
+anki_plot_intervals()         # Interval distribution
+anki_plot_hours()             # Reviews by hour
+anki_plot_weekdays()          # Reviews by weekday
+anki_plot_forgetting_curve()  # Personal forgetting curve
+```
+
+![Review Heatmap](man/figures/heatmap.png)
+
+### Time Series Analysis
+
+```r
+anki_ts_retention(by = "week")
+anki_ts_intervals(by = "week")
+anki_ts_decompose()           # Trend + seasonal + residual
+anki_ts_anomalies()           # Unusual study days
+anki_ts_forecast()            # Forecast future reviews
+```
+
+![Time Series Decomposition](man/figures/decomposition.png)
+
+## Advanced Features
 
 ### Learning Efficiency Analysis
 
@@ -153,88 +235,6 @@ anki_compare_forecasts(days_ahead = 14)
 
 # Scenario-based projections
 anki_workload_projection(days = 30)
-```
-
-## Visualizations
-
-```r
-anki_plot_heatmap()           # Calendar heatmap
-anki_plot_retention()         # Retention over time
-anki_plot_forecast()          # Upcoming workload
-anki_plot_difficulty()        # FSRS difficulty distribution
-anki_plot_intervals()         # Interval distribution
-anki_plot_hours()             # Reviews by hour
-anki_plot_weekdays()          # Reviews by weekday
-anki_plot_forgetting_curve()  # Personal forgetting curve
-```
-
-![Review Heatmap](man/figures/heatmap.png)
-
-### Time Series Analysis
-
-```r
-anki_ts_retention(by = "week")
-anki_ts_intervals(by = "week")
-anki_ts_decompose()           # Trend + seasonal + residual
-anki_ts_anomalies()           # Unusual study days
-anki_ts_forecast()            # Forecast future reviews
-```
-
-![Time Series Decomposition](man/figures/decomposition.png)
-
-## Core Features
-
-### Search (Anki-like syntax)
-
-```r
-anki_search("deck:Medical tag:cardiology")
-anki_search("is:due -is:suspended prop:ivl>30")
-
-anki_leeches()       # Problem cards
-anki_mature()        # Cards with ivl >= 21
-anki_due()           # Due for review
-```
-
-### FSRS Data Reading
-
-ankiR reads FSRS data from your Anki collection but does not implement the FSRS algorithm.
-For algorithm implementation, see [fsrs-r-pure](https://github.com/chrislongros/fsrs-r-pure).
-
-```r
-anki_cards_fsrs()                    # Get cards with FSRS parameters
-fsrs_current_retrievability()        # Current memory state from DB
-fsrs_forgetting_index()              # % below target retention
-fsrs_get_parameters()                # Read FSRS parameters from collection
-fsrs_compare_parameters()            # Compare your params to defaults
-fsrs_memory_states()                 # Get memory states for all cards
-fsrs_export_reviews()                # Export reviews for external optimizer
-fsrs_prepare_for_optimizer()         # Prepare data for fsrs-r-pure
-```
-
-### Comparative Analysis
-
-```r
-anki_compare_periods()    # This month vs last month
-anki_compare_decks()      # Side-by-side deck stats
-anki_benchmark()          # Compare to FSRS averages
-```
-
-### Export
-
-```r
-anki_to_csv("Medical", "medical.csv")
-anki_to_org("Medical", "medical.org")
-anki_to_markdown("Medical", "medical.md", format = "obsidian")
-anki_to_obsidian_sr("Medical", "medical_sr.md")
-anki_to_mochi("Medical", "medical.json")
-anki_to_json(output = "collection.json")
-anki_progress_report(format = "html")
-```
-
-### Interactive Dashboard
-
-```r
-anki_dashboard()  # Launches Shiny app
 ```
 
 ## Function Reference
